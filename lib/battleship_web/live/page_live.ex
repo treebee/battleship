@@ -4,11 +4,10 @@ defmodule BattleshipWeb.PageLive do
   alias Battleship.Games
 
   @impl true
-  def mount(_params, %{"_csrf_token" => csrf_token} = session, socket) do
+  def mount(_params, session, socket) do
     {:ok,
      socket
-     |> assign(:current_user, Map.get(session, "username"))
-     |> assign(:csrf_token, csrf_token)}
+     |> assign(:current_user, Map.get(session, "username"))}
   end
 
   @impl true
@@ -22,7 +21,7 @@ defmodule BattleshipWeb.PageLive do
           phx-click="new_game"
         >New Game</button>
         <% else %>
-        <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/", csrf_token: @csrf_token %>
+        <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/" %>
         <% end %>
       </div>
     </div>

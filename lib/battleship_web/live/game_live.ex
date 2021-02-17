@@ -15,10 +15,10 @@ defmodule BattleshipWeb.GameLive do
   ]
 
   @impl true
-  def mount(_params, %{"_csrf_token" => csrf_token} = session, socket) do
+  def mount(_params, session, socket) do
     current_user = Map.get(session, "username", nil)
     Presence.track(self(), "users", current_user, %{})
-    {:ok, assign(socket, current_user: current_user, players: [], csrf_token: csrf_token)}
+    {:ok, assign(socket, current_user: current_user, players: [])}
   end
 
   @impl true
@@ -87,7 +87,7 @@ defmodule BattleshipWeb.GameLive do
           <%= live_component @socket, BattleshipWeb.Components.GameLobby, assigned_ships: @assigned_ships, ships: @ships, ready: length(@player.ships) == 5 %>
         <% end %>
       <% else %>
-        <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/games/#{@game.id}", csrf_token: @csrf_token %>
+        <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/games/#{@game.id}" %>
       <% end %>
     </div>
     """

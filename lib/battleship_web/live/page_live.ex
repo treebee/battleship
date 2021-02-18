@@ -17,9 +17,9 @@ defmodule BattleshipWeb.PageLive do
   @impl true
   def render(assigns) do
     ~L"""
-    <h1 class="text-2xl text-blue-200 mt-10">Welcome, <%= @current_user %></h1>
-    <div class="mt-10">
+    <div class="mt-20">
       <%= if @current_user do %>
+      <h1 class="text-2xl text-blue-200 mb-5">Welcome, <%= @current_user %></h1>
         <div class="flex justify-between">
           <div class="flex">
             <%= live_component @socket, BattleshipWeb.Components.GamesList, id: "games-list", username: @current_user %>

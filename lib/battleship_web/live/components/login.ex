@@ -13,7 +13,7 @@ defmodule BattleshipWeb.Components.LoginComponent do
     ~L"""
       <%= form_for :credentials,
           Routes.login_path(BattleshipWeb.Endpoint, :login),
-          [phx_change: :validate, phx_target: @myself],
+          [phx_change: :validate, phx_target: @myself, id: "login-form"],
           fn f-> %>
         <%= text_input f, :username, class: "p-1" %>
         <%= hidden_input f, :return_to, value: @return_to %>

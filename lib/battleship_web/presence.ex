@@ -6,4 +6,8 @@ defmodule BattleshipWeb.Presence do
   def list_users(topic \\ "users") do
     list(topic) |> Enum.map(fn {name, _} -> name end)
   end
+
+  def track_user(username, topic \\ "users") do
+    track(self(), topic, username, %{})
+  end
 end

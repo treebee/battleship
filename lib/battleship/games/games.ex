@@ -32,6 +32,26 @@ defmodule Battleship.Games do
   end
 
   @doc """
+  Returns a list of games a certain user with given `username` can still (re)join.
+
+  ## Examples
+
+      iex> get_game_list("patrick")
+      [%Game{}, ...]
+
+  """
+  def get_game_list(username) do
+    Repo.all(
+      from g in Game,
+        join: p in Participant,
+        on: p.game_id == g.id,
+        where: g.state == :created or (g.state == :started and p.username != ^username),
+        group_by: g.id
+    )
+    |> Repo.preload(:participants)
+  end
+
+  @doc """
   Gets a single game.
 
   Raises `Ecto.NoResultsError` if the Game does not exist.

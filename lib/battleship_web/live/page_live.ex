@@ -13,13 +13,16 @@ defmodule BattleshipWeb.PageLive do
   @impl true
   def render(assigns) do
     ~L"""
-    <div class="mt-20 flex justify-center">
-      <div class="max-w-64">
+    <div class="mt-20">
+      <div class="flex justify-start">
         <%= if @current_user do %>
-        <button
-          class="rounded-md py-1 px-2 bg-blue-400 font-semibold"
-          phx-click="new_game"
-        >New Game</button>
+          <%= live_component @socket, BattleshipWeb.Components.GamesList, id: "games-list", username: @current_user %>
+          <div class="py-2">
+            <button
+              class="rounded-md py-1 px-2 bg-blue-400 font-semibold"
+              phx-click="new_game"
+            >New Game</button>
+          </div>
         <% else %>
         <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/" %>
         <% end %>

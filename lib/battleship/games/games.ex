@@ -7,8 +7,8 @@ defmodule Battleship.Games do
   alias Battleship.Repo
 
   alias Battleship.Game
-  alias Battleship.Ships
   alias Battleship.Participant
+  alias Battleship.Participants
 
   def subscribe(id) do
     BattleshipWeb.Endpoint.subscribe("game:#{id}")
@@ -16,6 +16,13 @@ defmodule Battleship.Games do
 
   def broadcast(id, event) do
     BattleshipWeb.Endpoint.broadcast!("game:#{id}", event, "")
+  end
+
+  def ready?(%Game{} = game) do
+    length(game.participants) == 2 and
+      game.participants
+      |> Enum.map(&Participants.ready?/1)
+      |> Enum.all?()
   end
 
   @doc """
@@ -136,16 +143,8 @@ defmodule Battleship.Games do
     Repo.get_by(Participant, game_id: game.id, username: username)
   end
 
-  def get_opponent(%Game{} = game, username) do
-    game.participants
-    |> Enum.filter(fn participant -> participant.username != username end)
-    |> List.first()
-  end
-
   def add_player(%Game{} = game, username) do
-    %Participant{}
-    |> Participant.changeset(%{game_id: game.id, username: username})
-    |> Repo.insert()
+    Participants.create_participant(%{game_id: game.id, username: username})
   end
 
   def start_game(%Game{} = game) do
@@ -161,11 +160,15 @@ defmodule Battleship.Games do
     end
   end
 
+  def start_game!(%Game{} = game) do
+    {:ok, game} = start_game(game)
+    game
+  end
+
   defp choose_start_player(%Game{} = game) do
     game.participants
     |> Enum.random()
-    |> Participant.changeset(%{is_start_player: true})
-    |> Repo.update()
+    |> Participants.update_participant(%{is_start_player: true})
   end
 
   def set_ships(participant, ships) do
@@ -175,26 +178,10 @@ defmodule Battleship.Games do
         %{name: ship.name, direction: ship.direction, size: ship.size, x: x, y: y}
       end)
 
-    participant
-    |> Participant.changeset(%{ships: ships})
-    |> Repo.update()
+    Participants.update_participant(participant, %{ships: ships})
   end
 
   def winner(game) do
-    game.participants |> Enum.filter(fn p -> has_won?(p) end) |> List.first()
-  end
-
-  @spec is_hit?({integer, integer}, %Battleship.Participant{}) :: boolean
-  def is_hit?({x, y}, %Participant{} = opponent) do
-    opponent.ships
-    |> Enum.map(&Ships.is_hit?(&1, {x, y}))
-    |> Enum.any?()
-  end
-
-  @spec has_won?(%Battleship.Participant{}) :: boolean
-  def has_won?(%Participant{} = participant) do
-    participant.shots
-    |> Enum.filter(fn shot -> shot.hit end)
-    |> length() == 17
+    game.participants |> Enum.filter(&Participants.has_won?/1) |> List.first()
   end
 end

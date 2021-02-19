@@ -110,7 +110,7 @@ defmodule BattleshipWeb.GameLive do
     ship = %Ship{name: id, size: size, direction: direction, x: x, y: y}
 
     socket =
-      case Field.placement_valid(ship, assigned_ships) do
+      case Field.placement_valid?(ship, assigned_ships) do
         true ->
           ships = update_ship(socket.assigns.ships, id, %{draggable: false})
 
@@ -138,7 +138,7 @@ defmodule BattleshipWeb.GameLive do
     ships = Map.delete(socket.assigns.assigned_ships, {x, y})
 
     socket =
-      case Field.placement_valid(ship, ships) do
+      case Field.placement_valid?(ship, ships) do
         true ->
           socket
           |> assign(:assigned_ships, Map.put(ships, {x, y}, ship))
@@ -156,23 +156,13 @@ defmodule BattleshipWeb.GameLive do
         _,
         %{assigns: %{game: game, current_user: current_user, assigned_ships: ships}} = socket
       ) do
-    Games.set_ships(
-      Games.get_player(game, current_user),
-      ships
-    )
+    Games.set_ships(Games.get_player(game, current_user), ships)
 
     game = Games.get_game!(game.id)
 
-    game =
-      case length(game.participants) == 2 and
-             Enum.all?(Enum.map(game.participants, fn p -> length(p.ships) == 5 end)) do
-        true ->
-          {:ok, game} = Games.start_game(game)
-          game
-
-        false ->
-          game
-      end
+    IO.inspect(game.participants)
+    IO.inspect(Games.ready?(game))
+    game = if Games.ready?(game), do: Games.start_game!(game), else: game
 
     {:noreply,
      socket |> assign(:game, game) |> assign(:player, Games.get_player(game, current_user))}
@@ -191,7 +181,7 @@ defmodule BattleshipWeb.GameLive do
             {:ok, player} ->
               Games.broadcast(game.id, "shoot")
 
-              if Games.has_won?(player) do
+              if Participants.has_won?(player) do
                 Games.update_game(game, %{state: :finished})
                 Games.broadcast(game.id, "game_finished")
               end

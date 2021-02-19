@@ -5,15 +5,15 @@ defmodule Battleship.Field do
   @max_x 9
   @max_y 9
 
-  def placement_valid(%Ship{x: x, y: _y, size: size, direction: "x"}, _ships)
+  def placement_valid?(%Ship{x: x, y: _y, size: size, direction: "x"}, _ships)
       when x + size > @max_x + 1,
       do: false
 
-  def placement_valid(%Ship{x: _x, y: y, size: size, direction: "y"}, _ships)
+  def placement_valid?(%Ship{x: _x, y: y, size: size, direction: "y"}, _ships)
       when y + size > @max_y + 1,
       do: false
 
-  def placement_valid(%Ship{} = ship, ships) do
+  def placement_valid?(%Ship{} = ship, ships) do
     occupied_cells =
       ships
       |> Enum.map(fn {{a, b}, %{direction: direction, size: size}} ->

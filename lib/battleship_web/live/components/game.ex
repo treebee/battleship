@@ -2,6 +2,7 @@ defmodule BattleshipWeb.Components.Game do
   use BattleshipWeb, :live_component
 
   alias Battleship.Games
+  alias Battleship.Participants
 
   @impl true
   def mount(socket) do
@@ -11,7 +12,7 @@ defmodule BattleshipWeb.Components.Game do
   @impl true
   def update(assigns, socket) do
     player = Games.get_player(assigns.game, assigns.current_user)
-    opponent = Games.get_opponent(assigns.game, assigns.current_user)
+    opponent = Participants.get_opponent(player)
 
     player_shots = player.shots |> Enum.map(fn shot -> {{shot.x, shot.y}, shot} end) |> Map.new()
 
@@ -40,6 +41,7 @@ defmodule BattleshipWeb.Components.Game do
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player %>
             <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false %>
+            <%= live_component @socket, BattleshipWeb.Components.HitCounter, id: "hit-counter", shots: @player.shots %>
           </div>
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @opponent %>
@@ -50,6 +52,7 @@ defmodule BattleshipWeb.Components.Game do
               is_opponent: true,
               shots: @player_shots,
               clickable: @game.state != :finished %>
+            <%= live_component @socket, BattleshipWeb.Components.HitCounter, id: "hit-counter-opponent", shots: @opponent.shots %>
           </div>
         </div>
       </div>

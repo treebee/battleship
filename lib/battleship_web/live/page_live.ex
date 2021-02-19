@@ -9,9 +9,14 @@ defmodule BattleshipWeb.PageLive do
     username = Map.get(session, "username")
     Presence.track_user(username)
 
+    Games.subscribe()
+
+    games = Games.get_game_list(username)
+
     {:ok,
      socket
-     |> assign(:current_user, username)}
+     |> assign(:current_user, username)
+     |> assign(:games, games), temporary_assigns: [games: []]}
   end
 
   @impl true
@@ -22,7 +27,7 @@ defmodule BattleshipWeb.PageLive do
       <h1 class="text-2xl text-blue-200 mb-5">Welcome <%= @current_user %></h1>
         <div class="flex justify-between">
           <div class="flex">
-            <%= live_component @socket, BattleshipWeb.Components.GamesList, id: "games-list", username: @current_user %>
+            <%= live_component @socket, BattleshipWeb.Components.GamesList, username: @current_user, games: @games %>
             <div class="py-2">
               <button
                 class="rounded-md py-1 px-2 border-2 border-blue-200 hover:bg-blue-400 font-semibold text-white"
@@ -49,5 +54,10 @@ defmodule BattleshipWeb.PageLive do
       |> push_redirect(to: Routes.game_path(socket, :index, game.id))
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(%{event: "game_created", payload: game}, socket) do
+    {:noreply, update(socket, :games, fn games -> [game | games] end)}
   end
 end

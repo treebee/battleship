@@ -10,14 +10,6 @@ defmodule Battleship.Games do
   alias Battleship.Participant
   alias Battleship.Participants
 
-  def subscribe(id) do
-    BattleshipWeb.Endpoint.subscribe("game:#{id}")
-  end
-
-  def broadcast(id, event) do
-    BattleshipWeb.Endpoint.broadcast!("game:#{id}", event, "")
-  end
-
   def ready?(%Game{} = game) do
     length(game.participants) == 2 and
       game.participants
@@ -90,6 +82,7 @@ defmodule Battleship.Games do
     %Game{}
     |> Game.changeset(attrs)
     |> Repo.insert()
+    |> broadcast("game_created")
   end
 
   @doc """
@@ -183,5 +176,24 @@ defmodule Battleship.Games do
 
   def winner(game) do
     game.participants |> Enum.filter(&Participants.has_won?/1) |> List.first()
+  end
+
+  def subscribe() do
+    BattleshipWeb.Endpoint.subscribe("games")
+  end
+
+  def subscribe(id) do
+    BattleshipWeb.Endpoint.subscribe("game:#{id}")
+  end
+
+  def broadcast({:error, _reason} = error, _event), do: error
+
+  def broadcast({:ok, game}, event) do
+    BattleshipWeb.Endpoint.broadcast!("games", event, game)
+    {:ok, game}
+  end
+
+  def broadcast(id, event) do
+    BattleshipWeb.Endpoint.broadcast!("game:#{id}", event, "")
   end
 end

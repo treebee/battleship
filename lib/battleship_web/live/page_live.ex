@@ -9,6 +9,7 @@ defmodule BattleshipWeb.PageLive do
     username = Map.get(session, "username")
     Presence.track_user(username)
 
+    Presence.subscribe()
     Games.subscribe()
 
     games = Games.get_game_list(username)
@@ -16,7 +17,8 @@ defmodule BattleshipWeb.PageLive do
     {:ok,
      socket
      |> assign(:current_user, username)
-     |> assign(:games, games), temporary_assigns: [games: []]}
+     |> assign(:games, games)
+     |> assign(:active_users, Presence.list_users()), temporary_assigns: [games: []]}
   end
 
   @impl true
@@ -35,7 +37,7 @@ defmodule BattleshipWeb.PageLive do
               >New Game</button>
             </div>
           </div>
-          <%= live_component @socket, BattleshipWeb.Components.ActiveUsersList, id: "active-users" %>
+          <%= live_component @socket, BattleshipWeb.Components.ActiveUsersList, users: @active_users %>
         <% else %>
           <div class="flex justify-center">
           <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/" %>
@@ -59,5 +61,20 @@ defmodule BattleshipWeb.PageLive do
   @impl true
   def handle_info(%{event: "game_created", payload: game}, socket) do
     {:noreply, update(socket, :games, fn games -> [game | games] end)}
+  end
+
+  @impl true
+  def handle_info(
+        %{event: "presence_diff", topic: "users"},
+        socket
+      ) do
+    {:noreply, assign(socket, :active_users, Presence.list_users())}
+  end
+
+  @impl true
+  def handle_info(%{event: "presence_diff"}, socket) do
+    id = socket.assigns.game.id
+    players = Presence.list("game:#{id}") |> Enum.map(fn {name, _} -> name end)
+    {:noreply, assign(socket, players: players)}
   end
 end

@@ -39,6 +39,8 @@ defmodule Battleship.Games do
       [%Game{}, ...]
 
   """
+  def get_game_list(nil), do: []
+
   def get_game_list(username) do
     Repo.all(
       from g in Game,

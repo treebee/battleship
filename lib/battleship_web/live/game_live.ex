@@ -17,7 +17,11 @@ defmodule BattleshipWeb.GameLive do
   @impl true
   def mount(_params, session, socket) do
     current_user = Map.get(session, "username", nil)
-    Presence.track(self(), "users", current_user, %{})
+
+    if connected?(socket) do
+      Presence.track(self(), "users", current_user, %{})
+    end
+
     {:ok, assign(socket, current_user: current_user, players: [])}
   end
 

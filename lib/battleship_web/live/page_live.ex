@@ -9,8 +9,10 @@ defmodule BattleshipWeb.PageLive do
     username = Map.get(session, "username")
     Presence.track_user(username)
 
-    Presence.subscribe()
-    Games.subscribe()
+    if connected?(socket) do
+      Presence.subscribe()
+      Games.subscribe()
+    end
 
     games = Games.get_game_list(username)
 
@@ -24,24 +26,31 @@ defmodule BattleshipWeb.PageLive do
   @impl true
   def render(assigns) do
     ~L"""
-    <div class="mt-20">
+    <div class="mt-10 mx-4">
       <%= if @current_user do %>
-      <h1 class="text-2xl text-blue-200 mb-5">Welcome <%= @current_user %></h1>
-        <div class="flex justify-between">
-          <div class="flex">
-            <%= live_component @socket, BattleshipWeb.Components.GamesList, username: @current_user, games: @games %>
-            <div class="py-2">
-              <button
-                class="rounded-md py-1 px-2 border-2 border-blue-200 hover:bg-blue-400 font-semibold text-white"
-                phx-click="new_game"
-              >New Game</button>
-            </div>
-          </div>
+      <div class="p-5 rounded rounded-md bg-gradient-to-br from-gray-900 to-gray-700">
+        <h1 class="text-2xl text-blue-200 mb-2">
+          Welcome <%= @current_user %>
+        </h1>
+        <p class="text-lg text-gray-100">
+          Join one of the open games or create a new one to play with a friend.
+        </p>
+        <div class="py-2 mt-5">
+          <button
+            class="rounded-md py-1 px-2 border-2 border-blue-200 hover:bg-blue-400 font-semibold text-white"
+            phx-click="new_game"
+          >New Game</button>
+        </div>
+      </div>
+      <div class="flex justify-between p-5 bg-gradient-to-br from-gray-900 to-gray-700 mt-5 rounded rounded-md">
+        <div class="flex">
+          <%= live_component @socket, BattleshipWeb.Components.GamesList, username: @current_user, games: @games %>
+        </div>
           <%= live_component @socket, BattleshipWeb.Components.ActiveUsersList, users: @active_users %>
-        <% else %>
-          <div class="flex justify-center">
+      <% else %>
+        <div class="flex justify-center">
           <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/" %>
-        <% end %>
+      <% end %>
       </div>
     </div>
     """

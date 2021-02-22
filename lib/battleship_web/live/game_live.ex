@@ -160,7 +160,7 @@ defmodule BattleshipWeb.GameLive do
         _,
         %{assigns: %{game: game, current_user: current_user, assigned_ships: ships}} = socket
       ) do
-    Games.set_ships(Games.get_player(game, current_user), ships)
+    Participants.set_ships(Games.get_player(game, current_user), ships)
 
     game = Games.get_game!(game.id)
 

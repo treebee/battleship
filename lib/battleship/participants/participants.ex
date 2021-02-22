@@ -48,6 +48,16 @@ defmodule Battleship.Participants do
     |> Repo.update()
   end
 
+  def set_ships(participant, ships) do
+    ships =
+      ships
+      |> Enum.map(fn {{x, y}, ship} ->
+        %{name: ship.name, direction: ship.direction, size: ship.size, x: x, y: y}
+      end)
+
+    update_participant(participant, %{ships: ships})
+  end
+
   def ready?(%Participant{} = player) do
     length(player.ships) == 5
   end

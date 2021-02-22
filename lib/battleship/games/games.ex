@@ -166,16 +166,6 @@ defmodule Battleship.Games do
     |> Participants.update_participant(%{is_start_player: true})
   end
 
-  def set_ships(participant, ships) do
-    ships =
-      ships
-      |> Enum.map(fn {{x, y}, ship} ->
-        %{name: ship.name, direction: ship.direction, size: ship.size, x: x, y: y}
-      end)
-
-    Participants.update_participant(participant, %{ships: ships})
-  end
-
   def winner(game) do
     game.participants |> Enum.filter(&Participants.has_won?/1) |> List.first()
   end

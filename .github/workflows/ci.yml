@@ -30,3 +30,9 @@ jobs:
       - run: npm ci
         working-directory: "./assets"
       - run: mix coveralls.github
+      - name: Archive screenshots
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'screenshots'
+          path: screenshots
+        if: ${{ failure() }}

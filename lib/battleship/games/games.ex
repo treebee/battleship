@@ -166,6 +166,22 @@ defmodule Battleship.Games do
     |> Participants.update_participant(%{is_start_player: true})
   end
 
+  def get_start_player(game) do
+    case game.participants do
+      [player1, player2] ->
+        cond do
+          Participants.their_turn?(player1) -> player1
+          Participants.their_turn?(player2) -> player2
+        end
+
+      [_player1] ->
+        nil
+
+      _ ->
+        nil
+    end
+  end
+
   def winner(game) do
     game.participants |> Enum.filter(&Participants.has_won?/1) |> List.first()
   end

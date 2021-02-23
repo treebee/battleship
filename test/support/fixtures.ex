@@ -11,12 +11,27 @@ defmodule Battleship.Fixtures do
 
   def game do
     alias Battleship.Games
+    alias Battleship.Participants
 
     quote do
-      def game_fixture() do
+      def game_fixture(opts \\ %{}) do
         {:ok, game} = Games.create_game()
         {:ok, player1} = Games.add_player(game, "player1")
         {:ok, player2} = Games.add_player(game, "player2")
+        players_to_setup = Map.get(opts, :setup_players, 0)
+
+        case players_to_setup do
+          1 ->
+            Participants.set_ships(player1)
+
+          2 ->
+            Participants.set_ships(player1)
+            Participants.set_ships(player2)
+
+          0 ->
+            ""
+        end
+
         Games.get_game!(game.id)
       end
     end

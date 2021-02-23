@@ -5,6 +5,8 @@ defmodule Battleship.Participants do
   alias Battleship.Participant
   alias Battleship.Repo
 
+  def get_participant!(id), do: Repo.get!(Participant, id)
+
   @doc """
   Creates a participant.
 
@@ -46,6 +48,18 @@ defmodule Battleship.Participants do
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.put_embed(:shots, [shot | participant.shots])
     |> Repo.update()
+  end
+
+  def set_ships(participant) do
+    ships = [
+      %{name: "carrier", size: 5, x: 0, y: 0, direction: "y"},
+      %{name: "battleship", size: 4, x: 0, y: 1, direction: "y"},
+      %{name: "cruiser", size: 3, x: 0, y: 2, direction: "y"},
+      %{name: "submarine", size: 3, x: 0, y: 3, direction: "y"},
+      %{name: "destroyer", size: 2, x: 0, y: 4, direction: "y"}
+    ]
+
+    update_participant(participant, %{ships: ships})
   end
 
   def set_ships(participant, ships) do

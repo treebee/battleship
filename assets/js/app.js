@@ -16,37 +16,14 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import NProgress from "nprogress";
 import { LiveSocket } from "phoenix_live_view";
-
-import "alpinejs";
+import dragHook from "./dragHook";
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 const Hooks = {};
-Hooks.Drag = {
-  mounted() {
-    window.dragHook = this;
-  },
-  destroyed() {
-    window.modalHook = null;
-  },
-  dragStart(event) {
-    this.ship = {
-      id: event.target.id,
-      size: +event.target.dataset.size,
-      direction: event.target.dataset.direction,
-    };
-  },
-  dropShip(event, x, y) {
-    event.preventDefault();
-    this.pushEvent("add_ship", {
-      x,
-      y,
-      ...this.ship,
-    });
-    this.ship = null;
-  },
-};
+Hooks.Drag = dragHook;
+
 let liveSocket = new LiveSocket("/live", Socket, {
   dom: {
     onBeforeElUpdated(from, to) {

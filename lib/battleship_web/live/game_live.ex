@@ -164,8 +164,6 @@ defmodule BattleshipWeb.GameLive do
 
     game = Games.get_game!(game.id)
 
-    IO.inspect(game.participants)
-    IO.inspect(Games.ready?(game))
     game = if Games.ready?(game), do: Games.start_game!(game), else: game
 
     {:noreply,

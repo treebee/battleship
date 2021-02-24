@@ -61,16 +61,6 @@ defmodule Battleship.Fixtures do
     end
   end
 
-  def login() do
-    alias BattleshipWeb.Router.Helpers, as: Routes
-
-    quote do
-      def login(conn, credentials) do
-        post(conn, Routes.login_path(conn, :login), credentials: credentials)
-      end
-    end
-  end
-
   defmacro __using__(fixtures) when is_list(fixtures) do
     for fixture <- fixtures, is_atom(fixture), do: apply(__MODULE__, fixture, [])
   end

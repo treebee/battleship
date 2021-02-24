@@ -1,6 +1,7 @@
 defmodule BattleshipWeb.GameLiveTest do
   use BattleshipWeb.ConnCase
-  use Battleship.Fixtures, [:game, :login]
+  use Battleship.Fixtures, [:game]
+  use BattleshipWeb.Fixtures, [:login]
 
   import Phoenix.LiveViewTest
 

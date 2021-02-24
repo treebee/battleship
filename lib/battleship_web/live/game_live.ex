@@ -32,51 +32,12 @@ defmodule BattleshipWeb.GameLive do
 
   @impl true
   def handle_params(%{"id" => id}, _, %{assigns: %{current_user: current_user}} = socket) do
-    game = Games.get_game!(id)
-
     socket =
-      case Games.get_player(game, current_user) do
-        nil ->
-          case Games.add_player(game, current_user) do
-            {:error, _error} ->
-              socket
-              |> put_flash(:error, "Game already has 2 players!")
-              |> push_redirect(to: Routes.page_path(socket, :index))
+      Games.get_game!(id)
+      |> assign_user_to_game(current_user, socket)
+      |> prepare_player_info()
 
-            {:ok, player} ->
-              track_user(game.id, player.username)
-              socket |> assign(:game, Games.get_game!(id)) |> assign(:player, player)
-          end
-
-        player ->
-          track_user(game.id, current_user)
-          socket |> assign(:player, player)
-      end
-
-    socket =
-      case Map.get(socket.assigns, :player) do
-        nil ->
-          socket
-
-        player ->
-          case player.ships do
-            [] ->
-              socket |> assign(:assigned_ships, %{}) |> assign(:ships, @ships)
-
-            ships ->
-              assigned_ships =
-                ships |> Enum.map(fn ship -> {{ship.x, ship.y}, ship} end) |> Map.new()
-
-              socket
-              |> assign(:assigned_ships, assigned_ships)
-              |> assign(:ready, length(socket.assigns.player.ships) == 5)
-              |> assign(:ships, Enum.map(@ships, fn ship -> %{ship | draggable: false} end))
-          end
-      end
-
-    {:noreply,
-     socket
-     |> assign(:game, game)}
+    {:noreply, assign(socket, :game, Games.get_game!(id))}
   end
 
   @impl true
@@ -236,6 +197,48 @@ defmodule BattleshipWeb.GameLive do
     {:noreply,
      assign(socket, :game, game)
      |> assign(:player, Games.get_player(game, socket.assigns.current_user))}
+  end
+
+  defp assign_user_to_game(game, current_user, socket) do
+    case Games.get_player(game, current_user) do
+      nil ->
+        case Games.add_player(game, current_user) do
+          {:error, _error} ->
+            socket
+            |> put_flash(:error, "Game already has 2 players!")
+            |> push_redirect(to: Routes.page_path(socket, :index))
+
+          {:ok, player} ->
+            track_user(game.id, player.username)
+            socket |> assign(:player, player)
+        end
+
+      player ->
+        track_user(game.id, current_user)
+        socket |> assign(:player, player)
+    end
+  end
+
+  def prepare_player_info(socket) do
+    case Map.get(socket.assigns, :player) do
+      nil ->
+        socket
+
+      player ->
+        case player.ships do
+          [] ->
+            socket |> assign(:assigned_ships, %{}) |> assign(:ships, @ships)
+
+          ships ->
+            assigned_ships =
+              ships |> Enum.map(fn ship -> {{ship.x, ship.y}, ship} end) |> Map.new()
+
+            socket
+            |> assign(:assigned_ships, assigned_ships)
+            |> assign(:ready, length(socket.assigns.player.ships) == 5)
+            |> assign(:ships, Enum.map(@ships, fn ship -> %{ship | draggable: false} end))
+        end
+    end
   end
 
   def track_user(game_id, username) do

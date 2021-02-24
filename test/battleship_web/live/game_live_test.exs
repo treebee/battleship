@@ -1,70 +1,20 @@
 defmodule BattleshipWeb.GameLiveTest do
   use BattleshipWeb.ConnCase
-  use Battleship.Fixtures, [:game]
+  use Battleship.Fixtures, [:game, :login]
 
   import Phoenix.LiveViewTest
 
   alias Battleship.Games
   alias Battleship.Participants
 
-  def login(conn, credentials) do
-    post(conn, Routes.login_path(conn, :login), credentials: credentials)
-  end
-
-  def set_ships(view) do
-    view
-    |> render_hook("add_ship", %{
-      "x" => 0,
-      "y" => 0,
-      "id" => "lobbycarrier",
-      "size" => 5,
-      "direction" => "y"
-    })
-
-    view
-    |> render_hook("add_ship", %{
-      "x" => 1,
-      "y" => 0,
-      "id" => "lobbybattleship",
-      "size" => 4,
-      "direction" => "y"
-    })
-
-    view
-    |> render_hook("add_ship", %{
-      "x" => 2,
-      "y" => 0,
-      "id" => "lobbydestroyer",
-      "size" => 2,
-      "direction" => "y"
-    })
-
-    view
-    |> render_hook("add_ship", %{
-      "x" => 6,
-      "y" => 0,
-      "id" => "lobbycruiser",
-      "size" => 3,
-      "direction" => "y"
-    })
-
-    view
-    |> render_hook("add_ship", %{
-      "x" => 4,
-      "y" => 0,
-      "id" => "lobbysubmarine",
-      "size" => 3,
-      "direction" => "y"
-    })
-  end
-
   test "user can set ships", %{conn: conn} do
     game = game_fixture()
     [player1, _] = game.participants
 
-    conn = login(conn, %{username: player1.username, return_to: "/"})
-
-    {:ok, view, _html} = live(conn, "/games/#{game.id}")
+    {:ok, view, _html} =
+      conn
+      |> login(%{username: player1.username, return_to: "/"})
+      |> live("/games/#{game.id}")
 
     set_ships(view)
 
@@ -78,8 +28,11 @@ defmodule BattleshipWeb.GameLiveTest do
   test "user can toggle ships", %{conn: conn} do
     game = game_fixture()
     [player1, _] = game.participants
-    conn = login(conn, %{username: player1.username, return_to: "/"})
-    {:ok, view, _html} = live(conn, "/games/#{game.id}")
+
+    {:ok, view, _html} =
+      conn
+      |> login(%{username: player1.username, return_to: "/"})
+      |> live("/games/#{game.id}")
 
     set_ships(view)
 
@@ -99,9 +52,11 @@ defmodule BattleshipWeb.GameLiveTest do
   test "game starts when both players ready", %{conn: conn} do
     game = game_fixture(%{setup_players: 1})
     [_, player] = game.participants
-    conn = login(conn, %{username: player.username, return_to: "/"})
 
-    {:ok, view, _html} = live(conn, "/games/#{game.id}")
+    {:ok, view, _html} =
+      conn
+      |> login(%{username: player.username, return_to: "/"})
+      |> live("/games/#{game.id}")
 
     set_ships(view)
 
@@ -192,6 +147,7 @@ defmodule BattleshipWeb.GameLiveTest do
     assert length(opponent.shots) == 1
 
     make_turn(conn, player, game, {3, 1})
+
     player = Participants.get_participant!(player.id)
     assert length(player.shots) == 2
   end
@@ -226,5 +182,52 @@ defmodule BattleshipWeb.GameLiveTest do
 
     # we wait here a moment to make sure that the database updates are done
     Process.sleep(500)
+  end
+
+  defp set_ships(view) do
+    view
+    |> render_hook("add_ship", %{
+      "x" => 0,
+      "y" => 0,
+      "id" => "lobbycarrier",
+      "size" => 5,
+      "direction" => "y"
+    })
+
+    view
+    |> render_hook("add_ship", %{
+      "x" => 1,
+      "y" => 0,
+      "id" => "lobbybattleship",
+      "size" => 4,
+      "direction" => "y"
+    })
+
+    view
+    |> render_hook("add_ship", %{
+      "x" => 2,
+      "y" => 0,
+      "id" => "lobbydestroyer",
+      "size" => 2,
+      "direction" => "y"
+    })
+
+    view
+    |> render_hook("add_ship", %{
+      "x" => 6,
+      "y" => 0,
+      "id" => "lobbycruiser",
+      "size" => 3,
+      "direction" => "y"
+    })
+
+    view
+    |> render_hook("add_ship", %{
+      "x" => 4,
+      "y" => 0,
+      "id" => "lobbysubmarine",
+      "size" => 3,
+      "direction" => "y"
+    })
   end
 end

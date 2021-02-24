@@ -57,8 +57,9 @@ defmodule BattleshipWeb.PageLive do
   end
 
   @impl true
-  def handle_event("new_game", _params, socket) do
-    {:ok, game} = Games.create_game(%{player_1_name: socket.assigns.current_user})
+  def handle_event("new_game", _params, %{assigns: %{current_user: current_user}} = socket) do
+    {:ok, game} = Games.create_game()
+    Games.add_player(game, current_user)
 
     socket =
       socket
@@ -78,12 +79,5 @@ defmodule BattleshipWeb.PageLive do
         socket
       ) do
     {:noreply, assign(socket, :active_users, Presence.list_users())}
-  end
-
-  @impl true
-  def handle_info(%{event: "presence_diff"}, socket) do
-    id = socket.assigns.game.id
-    players = Presence.list("game:#{id}") |> Enum.map(fn {name, _} -> name end)
-    {:noreply, assign(socket, players: players)}
   end
 end

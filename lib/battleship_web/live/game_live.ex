@@ -48,7 +48,7 @@ defmodule BattleshipWeb.GameLive do
         <%= if @game.state in [:started, :finished] do %>
           <%= live_component @socket, BattleshipWeb.Components.Game, game: @game, current_user: @current_user %>
         <% else %>
-          <%= live_component @socket, BattleshipWeb.Components.GameLobby, assigned_ships: @assigned_ships, ships: @ships, ready: length(@player.ships) == 5 %>
+          <%= live_component @socket, BattleshipWeb.Components.GameLobby, ships_on_grid: @ships_on_grid, ships: @ships, ready: length(@player.ships) == 5 %>
         <% end %>
       <% else %>
         <%= live_component @socket, BattleshipWeb.Components.LoginComponent, id: "login", return_to: "/games/#{@game.id}" %>
@@ -65,24 +65,23 @@ defmodule BattleshipWeb.GameLive do
       ) do
     id = String.replace_leading(id, "lobby", "")
 
-    assigned_ships =
-      case Enum.find(socket.assigns.assigned_ships, fn {_, %{name: name}} -> name == id end) do
-        {{a, b}, _} -> Map.delete(socket.assigns.assigned_ships, {a, b})
-        _ -> socket.assigns.assigned_ships
-      end
+    ships_on_grid =
+      socket.assigns.ships_on_grid
+      |> Enum.filter(fn {_, %{name: name}} -> name != id end)
+      |> Map.new()
 
     ship = %Ship{name: id, size: size, direction: direction, x: x, y: y}
 
     socket =
-      case Field.placement_valid?(ship, assigned_ships) do
-        true ->
+      cond do
+        Field.placement_valid?(ship, ships_on_grid) ->
           ships = update_ship(socket.assigns.ships, id, %{draggable: false})
 
           socket
           |> assign(:ships, ships)
-          |> assign(:assigned_ships, Map.put(assigned_ships, {x, y}, ship))
+          |> assign(:ships_on_grid, Map.put(ships_on_grid, {x, y}, ship))
 
-        false ->
+        true ->
           socket
       end
 
@@ -94,18 +93,18 @@ defmodule BattleshipWeb.GameLive do
     {x, y} = {String.to_integer(x), String.to_integer(y)}
 
     ship =
-      Map.get(socket.assigns.assigned_ships, {x, y})
+      Map.get(socket.assigns.ships_on_grid, {x, y})
       |> Ships.toggle_direction()
 
     ship = %Ship{ship | x: x, y: y}
 
-    ships = Map.delete(socket.assigns.assigned_ships, {x, y})
+    ships = Map.delete(socket.assigns.ships_on_grid, {x, y})
 
     socket =
       case Field.placement_valid?(ship, ships) do
         true ->
           socket
-          |> assign(:assigned_ships, Map.put(ships, {x, y}, ship))
+          |> assign(:ships_on_grid, Map.put(ships, {x, y}, ship))
 
         false ->
           socket
@@ -118,7 +117,7 @@ defmodule BattleshipWeb.GameLive do
   def handle_event(
         "ready",
         _,
-        %{assigns: %{game: game, current_user: current_user, assigned_ships: ships}} = socket
+        %{assigns: %{game: game, current_user: current_user, ships_on_grid: ships}} = socket
       ) do
     Participants.set_ships(Games.get_player(game, current_user), ships)
 
@@ -227,14 +226,14 @@ defmodule BattleshipWeb.GameLive do
       player ->
         case player.ships do
           [] ->
-            socket |> assign(:assigned_ships, %{}) |> assign(:ships, @ships)
+            socket |> assign(:ships_on_grid, %{}) |> assign(:ships, @ships)
 
           ships ->
-            assigned_ships =
+            ships_on_grid =
               ships |> Enum.map(fn ship -> {{ship.x, ship.y}, ship} end) |> Map.new()
 
             socket
-            |> assign(:assigned_ships, assigned_ships)
+            |> assign(:ships_on_grid, ships_on_grid)
             |> assign(:ready, length(socket.assigns.player.ships) == 5)
             |> assign(:ships, Enum.map(@ships, fn ship -> %{ship | draggable: false} end))
         end

@@ -4,12 +4,12 @@ defmodule BattleshipWeb.Components.GameLobby do
   def render(assigns) do
     ~L"""
       <div class="flex justify-center">
-        <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: @assigned_ships, ready: @ready, clickable: false %>
+        <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: @ships_on_grid, ready: @ready, clickable: false %>
         <hr class="mx-4" />
         <div class="flex flex-col justify-between">
           <button
             class="my-2 py-1 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-blue-500 active:bg-blue-300 font-semibold disabled:opacity-20"
-            <%= if @ready or length(Map.keys(@assigned_ships)) != 5 do %>disabled="disabled"<% end %>
+            <%= if @ready or length(Map.keys(@ships_on_grid)) != 5 do %>disabled="disabled"<% end %>
             phx-click="ready"
           >Ready</button>
           <div class="w-64 h-64 flex">

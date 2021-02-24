@@ -50,6 +50,10 @@ defmodule Battleship.Participants do
     |> Repo.update()
   end
 
+  @doc """
+  A simple helper to set all ships for given `participant` with a known
+  configuration. Mostly useful for tests.
+  """
   def set_ships(participant) do
     ships = [
       %{name: "carrier", size: 5, x: 0, y: 0, direction: "y"},

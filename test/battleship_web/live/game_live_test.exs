@@ -170,6 +170,20 @@ defmodule BattleshipWeb.GameLiveTest do
     assert html =~ "Game already has 2 players!"
   end
 
+  test "game finishes when a player wins", %{conn: conn} do
+    game = game_almost_done()
+    player = Games.get_start_player(game)
+    make_turn(conn, player, game, {0, 0})
+    opponent = Participants.get_opponent(player)
+
+    {:ok, _view, html} =
+      conn
+      |> login(%{username: opponent.username, return_to: "/"})
+      |> live("/games/#{game.id}")
+
+    assert html =~ "#{player.username} won the game!"
+  end
+
   defp make_turn(conn, player, game, {x, y}) do
     {:ok, view, _html} =
       conn

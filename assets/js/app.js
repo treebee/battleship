@@ -16,13 +16,14 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import NProgress from "nprogress";
 import { LiveSocket } from "phoenix_live_view";
-import dragHook from "./dragHook";
+import Drag from "./dragHook";
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
-const Hooks = {};
-Hooks.Drag = dragHook;
+const Hooks = {
+  Drag,
+};
 
 let liveSocket = new LiveSocket("/live", Socket, {
   dom: {

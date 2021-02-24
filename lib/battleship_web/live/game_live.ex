@@ -73,16 +73,14 @@ defmodule BattleshipWeb.GameLive do
     ship = %Ship{name: id, size: size, direction: direction, x: x, y: y}
 
     socket =
-      cond do
-        Field.placement_valid?(ship, ships_on_grid) ->
-          ships = update_ship(socket.assigns.ships, id, %{draggable: false})
+      if Field.placement_valid?(ship, ships_on_grid) do
+        ships = update_ship(socket.assigns.ships, id, %{draggable: false})
 
-          socket
-          |> assign(:ships, ships)
-          |> assign(:ships_on_grid, Map.put(ships_on_grid, {x, y}, ship))
-
-        true ->
-          socket
+        socket
+        |> assign(:ships, ships)
+        |> assign(:ships_on_grid, Map.put(ships_on_grid, {x, y}, ship))
+      else
+        socket
       end
 
     {:noreply, socket}
@@ -101,13 +99,11 @@ defmodule BattleshipWeb.GameLive do
     ships = Map.delete(socket.assigns.ships_on_grid, {x, y})
 
     socket =
-      case Field.placement_valid?(ship, ships) do
-        true ->
-          socket
-          |> assign(:ships_on_grid, Map.put(ships, {x, y}, ship))
-
-        false ->
-          socket
+      if Field.placement_valid?(ship, ships) do
+        socket
+        |> assign(:ships_on_grid, Map.put(ships, {x, y}, ship))
+      else
+        socket
       end
 
     {:noreply, socket}
@@ -136,26 +132,24 @@ defmodule BattleshipWeb.GameLive do
         %{assigns: %{game: game, player: player}} = socket
       ) do
     socket =
-      case Participants.their_turn?(player) do
-        true ->
-          case Participants.shoot(player, {x, y}) do
-            {:ok, player} ->
-              Games.broadcast(game.id, "shoot")
+      if Participants.their_turn?(player) do
+        case Participants.shoot(player, {x, y}) do
+          {:ok, player} ->
+            Games.broadcast(game.id, "shoot")
 
-              if Participants.has_won?(player) do
-                Games.update_game(game, %{state: :finished})
-                Games.broadcast(game.id, "game_finished")
-              end
+            if Participants.has_won?(player) do
+              Games.update_game(game, %{state: :finished})
+              Games.broadcast(game.id, "game_finished")
+            end
 
-              socket |> assign(:game, Games.get_game!(game.id))
+            socket |> assign(:game, Games.get_game!(game.id))
 
-            {:error, error} ->
-              IO.puts(:stderr, error)
-              socket
-          end
-
-        false ->
-          socket
+          {:error, error} ->
+            IO.puts(:stderr, error)
+            socket
+        end
+      else
+        socket
       end
 
     {:noreply, socket}

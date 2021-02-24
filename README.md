@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/treebee/battleship/badge.svg?branch=main)](https://coveralls.io/github/treebee/battleship?branch=main)
+
 # Battleship
 
 To start your Phoenix server:

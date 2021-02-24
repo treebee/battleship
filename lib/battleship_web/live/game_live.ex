@@ -18,7 +18,7 @@ defmodule BattleshipWeb.GameLive do
   def mount(_params, session, socket) do
     current_user = Map.get(session, "username", nil)
 
-    if connected?(socket) do
+    if connected?(socket) and current_user do
       Presence.track(self(), "users", current_user, %{})
     end
 
@@ -37,15 +37,14 @@ defmodule BattleshipWeb.GameLive do
     socket =
       case Games.get_player(game, current_user) do
         nil ->
-          case game.participants |> Enum.map(fn p -> p.username end) do
-            [_player1, _player2] ->
+          case Games.add_player(game, current_user) do
+            {:error, _error} ->
               socket
               |> put_flash(:error, "Game already has 2 players!")
               |> push_redirect(to: Routes.page_path(socket, :index))
 
-            _ ->
-              {:ok, player} = Games.add_player(game, current_user)
-              track_user(game.id, current_user)
+            {:ok, player} ->
+              track_user(game.id, player.username)
               socket |> assign(:game, Games.get_game!(id)) |> assign(:player, player)
           end
 

@@ -144,6 +144,10 @@ defmodule Battleship.Games do
     Repo.get_by(Participant, game_id: game.id, username: username)
   end
 
+  @doc """
+  Creates a participant with the given `username` or returns an error
+  in case the game already has two participants.
+  """
   def add_player(%Game{} = game, username) do
     Participants.create_participant(%{game_id: game.id, username: username})
   end

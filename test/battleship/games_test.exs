@@ -20,4 +20,12 @@ defmodule Battleship.GamesTest do
     {:ok, game} = Games.create_game()
     assert [game] == Games.list_games()
   end
+
+  test "game cannot have more than two players" do
+    {:ok, game} = Games.create_game()
+    {:ok, _player1} = Games.add_player(game, "player1")
+    {:ok, _player2} = Games.add_player(game, "player2")
+    {:error, error} = Games.add_player(game, "player3")
+    assert error == "A Game cannot have more than 2 participants!"
+  end
 end

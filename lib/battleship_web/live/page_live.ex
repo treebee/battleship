@@ -68,12 +68,18 @@ defmodule BattleshipWeb.PageLive do
         %{"game" => %{"secret" => secret}},
         %{assigns: %{current_user: current_user}} = socket
       ) do
-    {:ok, game} = Games.create_game(%{secret: secret})
-    Games.add_player(game, current_user)
-
     socket =
-      socket
-      |> push_redirect(to: Routes.game_path(socket, :index, game.id))
+      case Games.create_game(%{secret: secret}) do
+        {:ok, game} ->
+          Games.add_player(game, current_user)
+
+          socket
+          |> push_redirect(to: Routes.game_path(socket, :index, game.id))
+
+        {:error, _error} ->
+          socket
+          |> put_flash(:error, "Something went wrong. Please try again!")
+      end
 
     {:noreply, socket}
   end

@@ -2,3 +2,7 @@
 @import "../node_modules/nprogress/nprogress.css";
 
 @import "./tailwind.css";
+
+.alert:empty {
+  display: none;
+}

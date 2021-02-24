@@ -28,7 +28,7 @@ defmodule BattleshipWeb.PageLive do
     ~L"""
     <div class="mt-10 mx-4">
       <%= if @current_user do %>
-      <div class="p-5 rounded rounded-md bg-gradient-to-br from-gray-900 to-gray-700">
+      <div class="p-5 rounded rounded-md bg-gradient-to-br from-gray-900 to-gray-800 shadow-lg">
         <h1 class="text-2xl text-blue-200 mb-2">
           Welcome <%= @current_user %>
         </h1>
@@ -42,7 +42,7 @@ defmodule BattleshipWeb.PageLive do
           >New Game</button>
         </div>
       </div>
-      <div class="flex justify-between p-5 bg-gradient-to-br from-gray-900 to-gray-700 mt-5 rounded rounded-md">
+      <div class="flex justify-between p-5 bg-gradient-to-br from-gray-900 to-gray-800 shadow-lg mt-5 rounded rounded-md">
         <div class="flex">
           <%= live_component @socket, BattleshipWeb.Components.GamesList, username: @current_user, games: @games %>
         </div>

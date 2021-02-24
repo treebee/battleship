@@ -7,7 +7,6 @@ defmodule Battleship.Fixtures do
 
     use Battleship.Fixtures, [:game]
   """
-  use Wallaby.DSL
 
   def game do
     alias Battleship.Games
@@ -33,17 +32,6 @@ defmodule Battleship.Fixtures do
         end
 
         Games.get_game!(game.id)
-      end
-    end
-  end
-
-  def login do
-    quote do
-      def do_login(session, username) do
-        session
-        |> visit("/")
-        |> fill_in(Query.css("#credentials_username"), with: username)
-        |> click(Query.button("login"))
       end
     end
   end

@@ -16,12 +16,9 @@ config :battleship, Battleship.Repo,
 # you can enable the server option below.
 config :battleship, BattleshipWeb.Endpoint,
   http: [port: 4002],
-  server: true
+  server: false
 
 # Print only warnings and errors during test
 config :logger, level: :warn
 
 config :battleship, :sql_sandbox, true
-
-config :wallaby, :chromedriver, path: "assets/node_modules/.bin/chromedriver"
-config :wallaby, screenshot_on_failure: true

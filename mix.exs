@@ -56,8 +56,7 @@ defmodule Battleship.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:excoveralls, "~> 0.10", only: :test},
       {:sentry, "~> 8.0.5"},
-      {:hackney, "~> 1.8"},
-      {:wallaby, "~> 0.28.0", [runtime: false, only: :test]}
+      {:hackney, "~> 1.8"}
     ]
   end
 

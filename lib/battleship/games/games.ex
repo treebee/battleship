@@ -27,7 +27,7 @@ defmodule Battleship.Games do
 
   """
   def list_games do
-    Repo.all(Game)
+    Repo.all(from g in Game, order_by: g.inserted_at)
   end
 
   @doc """
@@ -46,8 +46,14 @@ defmodule Battleship.Games do
       from g in Game,
         join: p in Participant,
         on: p.game_id == g.id,
-        where: g.state == :created or (g.state == :started and p.username != ^username),
-        group_by: g.id
+        where:
+          (g.state == :created or
+             (g.state == :started and p.username != ^username)) and
+            (is_nil(g.secret) or
+               (not g.secret or
+                  p.username == ^username)),
+        group_by: g.id,
+        order_by: g.inserted_at
     )
     |> Repo.preload(:participants)
   end
@@ -197,7 +203,10 @@ defmodule Battleship.Games do
   def broadcast({:error, _reason} = error, _event), do: error
 
   def broadcast({:ok, game}, event) do
-    BattleshipWeb.Endpoint.broadcast!("games", event, game)
+    if not game.secret do
+      BattleshipWeb.Endpoint.broadcast!("games", event, game)
+    end
+
     {:ok, game}
   end
 

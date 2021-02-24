@@ -36,10 +36,16 @@ defmodule BattleshipWeb.PageLive do
           Join one of the open games or create a new one to play with a friend.
         </p>
         <div class="py-2 mt-5">
-          <button
-            class="rounded-md py-1 px-2 border-2 border-blue-200 hover:bg-blue-400 font-semibold text-white"
-            phx-click="new_game"
-          >New Game</button>
+          <%= form_for :game, "#", [phx_submit: "new_game", id: "new-game-form"], fn f -> %>
+          <%= submit "New Game",
+            class: "rounded-md py-1 px-2 border-2 border-blue-200 hover:bg-blue-400 font-semibold text-white"
+          %>
+          <br>
+          <div class="mt-4"a>
+            <%= checkbox f, :secret %>
+            <label for="game[secret]" class="text-white ml-2">Don't show game in public game list</label>
+          </div>
+          <% end %>
         </div>
       </div>
       <div class="flex justify-between p-5 bg-gradient-to-br from-gray-900 to-gray-800 shadow-lg mt-5 rounded rounded-md">
@@ -57,8 +63,12 @@ defmodule BattleshipWeb.PageLive do
   end
 
   @impl true
-  def handle_event("new_game", _params, %{assigns: %{current_user: current_user}} = socket) do
-    {:ok, game} = Games.create_game()
+  def handle_event(
+        "new_game",
+        %{"game" => %{"secret" => secret}},
+        %{assigns: %{current_user: current_user}} = socket
+      ) do
+    {:ok, game} = Games.create_game(%{secret: secret})
     Games.add_player(game, current_user)
 
     socket =

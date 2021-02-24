@@ -8,7 +8,7 @@ defmodule BattleshipWeb.Components.GameLobby do
         <hr class="mx-4" />
         <div class="flex flex-col justify-between">
           <button
-            class="my-2 py-1 py-2 bg-blue-500 font-semibold disabled:opacity-20"
+            class="my-2 py-1 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-blue-500 active:bg-blue-300 font-semibold disabled:opacity-20"
             <%= if @ready or length(Map.keys(@assigned_ships)) != 5 do %>disabled="disabled"<% end %>
             phx-click="ready"
           >Ready</button>

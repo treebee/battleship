@@ -29,8 +29,8 @@ defmodule BattleshipWeb.PageLiveTest do
 
     {:error, {:live_redirect, %{kind: :push, to: game_link}}} =
       view
-      |> element("button", "New Game")
-      |> render_click()
+      |> element("form")
+      |> render_submit()
 
     assert game_link =~ "/games/"
   end
@@ -45,8 +45,8 @@ defmodule BattleshipWeb.PageLiveTest do
 
     {:error, {:live_redirect, %{kind: :push, to: game_link}}} =
       view
-      |> element("button", "New Game")
-      |> render_click()
+      |> element("form")
+      |> render_submit()
 
     "/games/" <> game_id = game_link
 
@@ -57,5 +57,23 @@ defmodule BattleshipWeb.PageLiveTest do
     |> render_click()
 
     assert_redirected(view, "/games/#{game_id}")
+  end
+
+  test "user can create non-public games", %{conn: conn} do
+    conn = login(conn, %{username: "player1", return_to: "/"})
+
+    {:ok, view, _html} = live(conn, "/")
+
+    {:error, {:live_redirect, %{kind: :push, to: game_link}}} =
+      view
+      |> form("#new-game-form", %{game: %{"secret" => true}})
+      |> render_submit()
+
+    {:ok, _view, html} = live(conn, "/")
+
+    assert html =~ game_link
+
+    {:ok, _view, html} = conn |> login(%{username: "player2", return_to: "/"}) |> live("/")
+    assert not (html =~ game_link)
   end
 end

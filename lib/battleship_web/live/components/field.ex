@@ -24,7 +24,7 @@ defmodule BattleshipWeb.Components.Field do
   @impl true
   def render(assigns) do
     ~L"""
-    <div class="p-2 bg-blue-600 rounded-md">
+    <div class="p-2 bg-blue-600 rounded-md shadow-lg">
       <div class="grid grid-cols-10 gap-1">
         <%= for y <- 0..9 do %>
           <%= for x <- 0..9 do %>

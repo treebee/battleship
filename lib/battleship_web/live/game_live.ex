@@ -35,6 +35,7 @@ defmodule BattleshipWeb.GameLive do
     socket =
       Games.get_game!(id)
       |> assign_user_to_game(current_user, socket)
+      |> assign_opponent()
       |> prepare_player_info()
 
     Games.subscribe(id)
@@ -47,7 +48,7 @@ defmodule BattleshipWeb.GameLive do
     <div class="container mt-12">
       <%= if @current_user do %>
         <%= if @game.state in [:started, :finished] do %>
-          <%= live_component @socket, BattleshipWeb.Components.Game, game: @game, current_user: @current_user %>
+          <%= live_component @socket, BattleshipWeb.Components.Game, game: @game, player: @player, opponent: @opponent %>
         <% else %>
           <%= live_component @socket, BattleshipWeb.Components.GameLobby, ships_on_grid: @ships_on_grid, ships: @ships, ready: length(@player.ships) == 5 %>
         <% end %>
@@ -122,8 +123,14 @@ defmodule BattleshipWeb.GameLive do
 
     game = if Games.ready?(game), do: Games.start_game!(game), else: game
 
+    player = Games.get_player(game, current_user)
+    opponent = Participants.get_opponent(player)
+
     {:noreply,
-     socket |> assign(:game, game) |> assign(:player, Games.get_player(game, current_user))}
+     socket
+     |> assign(:game, game)
+     |> assign(:player, player)
+     |> assign(:opponent, opponent)}
   end
 
   @impl true
@@ -136,14 +143,15 @@ defmodule BattleshipWeb.GameLive do
       if Participants.their_turn?(player) do
         case Participants.shoot(player, {x, y}) do
           {:ok, player} ->
-            Games.broadcast(game.id, "shoot")
+            [shot | _shots] = player.shots
+            Games.broadcast(game.id, "shoot", %{"username" => player.username, "shot" => shot})
 
             if Participants.has_won?(player) do
               Games.update_game(game, %{state: :finished})
               Games.broadcast(game.id, "game_finished")
             end
 
-            socket |> assign(:game, Games.get_game!(game.id))
+            socket |> assign(:player, player)
 
           {:error, error} ->
             IO.puts(:stderr, error)
@@ -178,12 +186,18 @@ defmodule BattleshipWeb.GameLive do
   end
 
   @impl true
-  def handle_info(%{event: "shoot"}, socket) do
-    game = Games.get_game!(socket.assigns.game.id)
+  def handle_info(%{event: "shoot", payload: %{"username" => shooter, "shot" => shot}}, socket) do
+    socket =
+      if socket.assigns.player.username != shooter do
+        assign(socket, :opponent, %{
+          socket.assigns.opponent
+          | shots: [shot | socket.assigns.opponent.shots]
+        })
+      else
+        socket
+      end
 
-    {:noreply,
-     assign(socket, :game, game)
-     |> assign(:player, Games.get_player(game, socket.assigns.current_user))}
+    {:noreply, socket}
   end
 
   defp assign_user_to_game(game, current_user, socket) do
@@ -203,6 +217,12 @@ defmodule BattleshipWeb.GameLive do
         socket |> assign(:player, player)
     end
   end
+
+  defp assign_opponent(%{assigns: %{player: player}} = socket) do
+    assign(socket, :opponent, Participants.get_opponent(player))
+  end
+
+  defp assign_opponent(socket), do: socket
 
   def prepare_player_info(socket) do
     case Map.get(socket.assigns, :player) do

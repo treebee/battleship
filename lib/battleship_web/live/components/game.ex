@@ -2,7 +2,6 @@ defmodule BattleshipWeb.Components.Game do
   use BattleshipWeb, :live_component
 
   alias Battleship.Games
-  alias Battleship.Participants
 
   @impl true
   def mount(socket) do
@@ -11,18 +10,14 @@ defmodule BattleshipWeb.Components.Game do
 
   @impl true
   def update(assigns, socket) do
-    player = Games.get_player(assigns.game, assigns.current_user)
-    opponent = Participants.get_opponent(player)
-
-    player_shots = player.shots |> Enum.map(fn shot -> {{shot.x, shot.y}, shot} end) |> Map.new()
+    player_shots =
+      assigns.player.shots |> Enum.map(fn shot -> {{shot.x, shot.y}, shot} end) |> Map.new()
 
     opponent_shots =
-      opponent.shots |> Enum.map(fn shot -> {{shot.x, shot.y}, shot} end) |> Map.new()
+      assigns.opponent.shots |> Enum.map(fn shot -> {{shot.x, shot.y}, shot} end) |> Map.new()
 
     {:ok,
      assign(socket, assigns)
-     |> assign(:player, player)
-     |> assign(:opponent, opponent)
      |> assign(:player_shots, player_shots)
      |> assign(:opponent_shots, opponent_shots)}
   end

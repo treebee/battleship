@@ -214,7 +214,7 @@ defmodule Battleship.Games do
     {:ok, game}
   end
 
-  def broadcast(id, event) do
-    BattleshipWeb.Endpoint.broadcast!("game:#{id}", event, "")
+  def broadcast(id, event, payload \\ "") do
+    BattleshipWeb.Endpoint.broadcast!("game:#{id}", event, payload)
   end
 end

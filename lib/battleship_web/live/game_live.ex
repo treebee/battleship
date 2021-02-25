@@ -181,7 +181,7 @@ defmodule BattleshipWeb.GameLive do
   @impl true
   def handle_info(%{event: "start_game"}, socket) do
     game = Games.get_game!(socket.assigns.game.id)
-    {:noreply, assign(socket, :game, game)}
+    {:noreply, assign(socket, :game, game) |> determine_next_player()}
   end
 
   @impl true

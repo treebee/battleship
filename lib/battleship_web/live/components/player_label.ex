@@ -1,13 +1,6 @@
 defmodule BattleshipWeb.Components.PlayerLabel do
   use BattleshipWeb, :live_component
 
-  alias Battleship.Participants
-
-  @impl true
-  def update(%{player: player}, socket) do
-    {:ok, assign(socket, :player, player) |> assign(:active, Participants.their_turn?(player))}
-  end
-
   @impl true
   def render(assigns) do
     ~L"""

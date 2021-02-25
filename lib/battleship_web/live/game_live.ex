@@ -1,5 +1,6 @@
 defmodule BattleshipWeb.GameLive do
   use BattleshipWeb, :live_view
+
   alias Battleship.Field
   alias Battleship.Games
   alias Battleship.{Ship, Ships}
@@ -32,14 +33,18 @@ defmodule BattleshipWeb.GameLive do
 
   @impl true
   def handle_params(%{"id" => id}, _, %{assigns: %{current_user: current_user}} = socket) do
+    game = Games.get_game!(id)
+    socket = assign(socket, :game, game)
+
     socket =
-      Games.get_game!(id)
-      |> assign_user_to_game(current_user, socket)
+      socket
+      |> assign_user_to_game(current_user)
       |> assign_opponent()
+      |> determine_next_player()
       |> prepare_player_info()
 
     Games.subscribe(id)
-    {:noreply, assign(socket, :game, Games.get_game!(id))}
+    {:noreply, socket}
   end
 
   @impl true
@@ -48,7 +53,7 @@ defmodule BattleshipWeb.GameLive do
     <div class="container mt-12">
       <%= if @current_user do %>
         <%= if @game.state in [:started, :finished] do %>
-          <%= live_component @socket, BattleshipWeb.Components.Game, game: @game, player: @player, opponent: @opponent %>
+          <%= live_component @socket, BattleshipWeb.Components.Game, game: @game, player: @player, opponent: @opponent, next_player: @next_player %>
         <% else %>
           <%= live_component @socket, BattleshipWeb.Components.GameLobby, ships_on_grid: @ships_on_grid, ships: @ships, ready: length(@player.ships) == 5 %>
         <% end %>
@@ -197,10 +202,10 @@ defmodule BattleshipWeb.GameLive do
         socket
       end
 
-    {:noreply, socket}
+    {:noreply, socket |> toggle_next_player()}
   end
 
-  defp assign_user_to_game(game, current_user, socket) do
+  defp assign_user_to_game(%{assigns: %{game: game}} = socket, current_user) do
     case Games.get_player(game, current_user) do
       nil ->
         case Games.add_player(game, current_user) do
@@ -210,7 +215,7 @@ defmodule BattleshipWeb.GameLive do
             |> push_redirect(to: Routes.page_path(socket, :index))
 
           {:ok, player} ->
-            socket |> assign(:player, player)
+            socket |> assign(:player, player) |> assign(:game, Games.get_game!(game.id))
         end
 
       player ->
@@ -244,5 +249,39 @@ defmodule BattleshipWeb.GameLive do
             |> assign(:ships, Enum.map(@ships, fn ship -> %{ship | draggable: false} end))
         end
     end
+  end
+
+  defp determine_next_player(%{assigns: %{player: player, opponent: opponent}} = socket) do
+    if Participants.their_turn?(player) do
+      assign(socket, :next_player, player.username)
+    else
+      assign(socket, :next_player, opponent.username)
+    end
+  end
+
+  defp determine_next_player(socket), do: socket
+
+  defp toggle_next_player(
+         %{
+           assigns: %{
+             next_player: next_player,
+             player: %{username: next_player},
+             opponent: opponent
+           }
+         } = socket
+       ) do
+    assign(socket, :next_player, opponent.username)
+  end
+
+  defp toggle_next_player(
+         %{
+           assigns: %{
+             next_player: next_player,
+             player: player,
+             opponent: %{username: next_player}
+           }
+         } = socket
+       ) do
+    assign(socket, :next_player, player.username)
   end
 end

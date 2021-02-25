@@ -34,12 +34,12 @@ defmodule BattleshipWeb.Components.Game do
       <div class="flex justify-center md:block">
         <div class="inline-block md:flex md:justify-between">
           <div>
-            <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player %>
+            <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player, active: @player.username == @next_player %>
             <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false %>
             <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @player.shots %>
           </div>
           <div>
-            <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @opponent %>
+            <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @opponent, active: @opponent.username == @next_player %>
             <%= live_component @socket, BattleshipWeb.Components.Field,
               id: "opponent",
               ships: convert_ships(@opponent.ships),

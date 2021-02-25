@@ -100,12 +100,15 @@ defmodule Battleship.Participants do
     |> List.first()
   end
 
-  def shoot(%Participant{} = participant, {x, y}) when not is_integer(x) do
-    shoot(%Participant{} = participant, {String.to_integer(x), String.to_integer(y)})
+  def shoot(participant, coords, opponent \\ nil)
+
+  def shoot(%Participant{} = participant, {x, y}, opponent)
+      when not is_integer(x) do
+    shoot(%Participant{} = participant, {String.to_integer(x), String.to_integer(y)}, opponent)
   end
 
-  def shoot(%Participant{} = participant, {x, y}) do
-    opponent = get_opponent(participant)
+  def shoot(%Participant{} = participant, {x, y}, opponent) do
+    opponent = if opponent, do: opponent, else: get_opponent(participant)
 
     cond do
       {x, y} in (participant.shots |> Enum.map(fn shot -> {shot.x, shot.y} end)) ->

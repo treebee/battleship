@@ -137,11 +137,11 @@ defmodule BattleshipWeb.GameLive do
   def handle_event(
         "shoot",
         %{"x" => x, "y" => y},
-        %{assigns: %{game: game, player: player}} = socket
+        %{assigns: %{game: game, player: player, opponent: opponent}} = socket
       ) do
     socket =
       if Participants.their_turn?(player) do
-        case Participants.shoot(player, {x, y}) do
+        case Participants.shoot(player, {x, y}, opponent) do
           {:ok, player} ->
             [shot | _shots] = player.shots
             Games.broadcast(game.id, "shoot", %{"username" => player.username, "shot" => shot})

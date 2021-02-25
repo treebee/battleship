@@ -8,6 +8,7 @@ defmodule BattleshipWeb.Components.Cell do
       class="bg-blue-800 border-blue-900 text-white text-center text-xs w-8 h-8 relative"
       phx-value-x="<%= @x %>"
       phx-value-y="<%= @y %>"
+      phx-value-type="<%= :torpedo %>"
       <%= if @clickable do %>
       style="cursor: crosshair"
       phx-click="shoot"

@@ -102,12 +102,35 @@ defmodule Battleship.Participants do
 
   def shoot(participant, coords, opponent \\ nil)
 
-  def shoot(%Participant{} = participant, {x, y}, opponent)
+  def shoot(%Participant{} = participant, {x, y, type}, opponent)
       when not is_integer(x) do
-    shoot(%Participant{} = participant, {String.to_integer(x), String.to_integer(y)}, opponent)
+    shoot(
+      %Participant{} = participant,
+      {String.to_integer(x), String.to_integer(y), type},
+      opponent
+    )
   end
 
-  def shoot(%Participant{} = participant, {x, y}, opponent) do
+  def shoot(%Participant{} = participant, {x, y, :airstrike}, opponent) do
+    opponent = if opponent, do: opponent, else: get_opponent(participant)
+    strikes = for i <- -1..1, j <- -1..1, into: [], do: {x + i, y + j}
+
+    strikes = Enum.map(strikes, fn {a, b} -> %{x: a, y: b, hit: &is_hit?(&1, opponent)} end)
+    max_turn = length(participant.shots)
+
+    shot = %Shot{
+      turn: max_turn + 1,
+      x: x,
+      y: y,
+      hit: Enum.any?(strikes, fn strike -> strike.hit end),
+      strikes: strikes,
+      type: :airstrike
+    }
+
+    add_shot(participant, shot)
+  end
+
+  def shoot(%Participant{} = participant, {x, y, :torpedo}, opponent) do
     opponent = if opponent, do: opponent, else: get_opponent(participant)
 
     cond do
@@ -128,6 +151,12 @@ defmodule Battleship.Participants do
         add_shot(participant, shot)
     end
   end
+
+  def shoot(participant, {x, y, type}, opponent) when is_binary(type) do
+    shoot(participant, {x, y, String.to_atom(type)}, opponent)
+  end
+
+  def shoot(participant, {x, y}, opponent), do: shoot(participant, {x, y, :torpedo}, opponent)
 
   @spec is_hit?({integer, integer}, %Battleship.Participant{}) :: boolean
   def is_hit?({x, y}, %Participant{} = opponent) do

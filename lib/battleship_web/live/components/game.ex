@@ -41,7 +41,7 @@ defmodule BattleshipWeb.Components.Game do
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player %>
             <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false %>
-            <%= live_component @socket, BattleshipWeb.Components.HitCounter, id: "hit-counter", shots: @player.shots %>
+            <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @player.shots %>
           </div>
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @opponent %>
@@ -52,7 +52,7 @@ defmodule BattleshipWeb.Components.Game do
               is_opponent: true,
               shots: @player_shots,
               clickable: @game.state != :finished %>
-            <%= live_component @socket, BattleshipWeb.Components.HitCounter, id: "hit-counter-opponent", shots: @opponent.shots %>
+            <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @opponent.shots %>
           </div>
         </div>
       </div>

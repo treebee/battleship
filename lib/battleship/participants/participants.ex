@@ -56,11 +56,11 @@ defmodule Battleship.Participants do
   """
   def set_ships(participant) do
     ships = [
-      %{name: "carrier", size: 5, x: 0, y: 0, direction: "y"},
-      %{name: "battleship", size: 4, x: 0, y: 1, direction: "y"},
-      %{name: "cruiser", size: 3, x: 0, y: 2, direction: "y"},
-      %{name: "submarine", size: 3, x: 0, y: 3, direction: "y"},
-      %{name: "destroyer", size: 2, x: 0, y: 4, direction: "y"}
+      %{name: "carrier", size: 5, x: 0, y: 0, direction: "x"},
+      %{name: "battleship", size: 4, x: 0, y: 1, direction: "x"},
+      %{name: "cruiser", size: 3, x: 0, y: 2, direction: "x"},
+      %{name: "submarine", size: 3, x: 0, y: 3, direction: "x"},
+      %{name: "destroyer", size: 2, x: 0, y: 4, direction: "x"}
     ]
 
     update_participant(participant, %{ships: ships})
@@ -136,10 +136,33 @@ defmodule Battleship.Participants do
     |> Enum.any?()
   end
 
+  def is_hit?({x, y, :airstrike}, %Participant{} = opponent) do
+    strikes = for i <- -1..1, j <- -1..1, into: [], do: {x + i, y + j}
+
+    strikes
+    |> Enum.map(&is_hit?(&1, opponent))
+    |> Enum.any?()
+  end
+
   @spec has_won?(%Battleship.Participant{}) :: boolean
   def has_won?(%Participant{} = participant) do
+    participant
+    |> count_hits() == 17
+  end
+
+  def count_hits(%Participant{} = participant) do
     participant.shots
-    |> Enum.filter(fn shot -> shot.hit end)
-    |> length() == 17
+    |> Enum.map(&to_simple_shot/1)
+    |> List.flatten()
+    |> Map.new()
+    |> Enum.count(fn {_, hit} -> hit end)
+  end
+
+  defp to_simple_shot(%{type: :airstrike, strikes: strikes}) do
+    strikes |> Enum.map(&to_simple_shot/1)
+  end
+
+  defp to_simple_shot(%{x: x, y: y, hit: hit}) do
+    {{x, y}, hit}
   end
 end

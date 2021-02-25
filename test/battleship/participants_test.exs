@@ -2,6 +2,7 @@ defmodule Battleship.ParticipantsTest do
   use Battleship.DataCase
   alias Battleship.Games
   alias Battleship.Participants
+  alias Battleship.Shot
 
   defp fixture() do
     {:ok, game} = Games.create_game()
@@ -9,7 +10,7 @@ defmodule Battleship.ParticipantsTest do
     Games.add_player(game, "opponent")
     game = Games.get_game!(game.id)
     {:ok, game} = Games.start_game(game)
-    game
+    Games.get_game!(game.id)
   end
 
   test "get opponent" do
@@ -27,7 +28,6 @@ defmodule Battleship.ParticipantsTest do
 
   test "player can shoot" do
     game = fixture()
-    game = Games.get_game!(game.id)
     [start_player] = game.participants |> Enum.filter(fn p -> p.is_start_player end)
     {:ok, start_player} = Participants.shoot(start_player, {4, 4})
     assert length(start_player.shots) == 1
@@ -35,9 +35,39 @@ defmodule Battleship.ParticipantsTest do
 
   test "player cannot shoot multiple times at same spot" do
     game = fixture()
-    game = Games.get_game!(game.id)
     [start_player] = game.participants |> Enum.filter(fn p -> p.is_start_player end)
     {:ok, start_player} = Participants.shoot(start_player, {4, 4})
     {:error, _error} = Participants.shoot(start_player, {"4", "4"})
+  end
+
+  test "correctly calculates hits" do
+    game = fixture()
+    [player, _] = game.participants
+
+    shots = [
+      %Shot{x: 0, y: 0, hit: true, turn: 3, type: :torpedo},
+      %Shot{x: 0, y: 1, hit: true, turn: 2, type: :torpedo},
+      %Shot{
+        x: 1,
+        y: 1,
+        hit: true,
+        turn: 1,
+        type: :airstrike,
+        strikes: [
+          %{x: 0, y: 0, hit: true},
+          %{x: 0, y: 1, hit: true},
+          %{x: 0, y: 2, hit: true},
+          %{x: 1, y: 0, hit: true},
+          %{x: 1, y: 1, hit: false},
+          %{x: 1, y: 2, hit: false},
+          %{x: 2, y: 0, hit: false},
+          %{x: 2, y: 1, hit: false},
+          %{x: 2, y: 2, hit: false}
+        ]
+      }
+    ]
+
+    player = %{player | shots: shots}
+    assert Participants.count_hits(player) == 4
   end
 end

@@ -251,6 +251,8 @@ defmodule BattleshipWeb.GameLive do
     end
   end
 
+  defp determine_next_player(%{assigns: %{opponent: nil}} = socket), do: socket
+
   defp determine_next_player(%{assigns: %{player: player, opponent: opponent}} = socket) do
     if Participants.their_turn?(player) do
       assign(socket, :next_player, player.username)

@@ -6,18 +6,20 @@ defmodule BattleshipWeb.Components.Cell do
     ~L"""
     <div
       class="bg-blue-800 border-blue-900 text-white text-center text-xs w-8 h-8 relative"
+     <%= if @clickable do %>
+      id="cell-<%= @x %>-<%= @y %>"
+      phx-click="shoot"
       phx-value-x="<%= @x %>"
       phx-value-y="<%= @y %>"
-      phx-value-type="<%= :torpedo %>"
-      <%= if @clickable do %>
+      phx-value-type="<%= @weapon %>"
       style="cursor: crosshair"
-      phx-click="shoot"
-      id="cell-<%= @x %>-<%= @y %>"
       <% else %>
+      <%= if not @game_started do %>
       phx-hook="Drag"
       ondrop="dragHook.dropShip(event, <%= @x %>, <%= @y %>)"
       ondragover="event.currentTarget.classList.add('bg-blue-900')"
       ondragleave="event.currentTarget.classList.remove('bg-blue-900')"
+      <% end %>
       <% end %>
     >
       <%= if @ship do %>

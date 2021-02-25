@@ -100,6 +100,15 @@ defmodule Battleship.Participants do
     |> List.first()
   end
 
+  def has_airstrikes_left?(participant) do
+    participant = get_participant!(participant.id)
+
+    case participant.num_airstrikes do
+      nil -> false
+      airstrikes -> airstrikes > 0
+    end
+  end
+
   def shoot(participant, coords, opponent \\ nil)
 
   def shoot(%Participant{} = participant, {x, y, type}, opponent)
@@ -112,22 +121,30 @@ defmodule Battleship.Participants do
   end
 
   def shoot(%Participant{} = participant, {x, y, :airstrike}, opponent) do
-    opponent = if opponent, do: opponent, else: get_opponent(participant)
-    strikes = for i <- -1..1, j <- -1..1, into: [], do: {x + i, y + j}
+    cond do
+      has_airstrikes_left?(participant) ->
+        opponent = if opponent, do: opponent, else: get_opponent(participant)
+        strikes = for i <- -1..1, j <- -1..1, into: [], do: {x + i, y + j}
 
-    strikes = Enum.map(strikes, fn {a, b} -> %{x: a, y: b, hit: &is_hit?(&1, opponent)} end)
-    max_turn = length(participant.shots)
+        strikes =
+          Enum.map(strikes, fn {a, b} -> %{x: a, y: b, hit: is_hit?({a, b}, opponent)} end)
 
-    shot = %Shot{
-      turn: max_turn + 1,
-      x: x,
-      y: y,
-      hit: Enum.any?(strikes, fn strike -> strike.hit end),
-      strikes: strikes,
-      type: :airstrike
-    }
+        max_turn = length(participant.shots)
 
-    add_shot(participant, shot)
+        shot = %Shot{
+          turn: max_turn + 1,
+          x: x,
+          y: y,
+          hit: Enum.any?(strikes, fn strike -> strike.hit end),
+          strikes: strikes,
+          type: :airstrike
+        }
+
+        add_shot(participant, shot)
+
+      true ->
+        {:error, "No airstrikes left!"}
+    end
   end
 
   def shoot(%Participant{} = participant, {x, y, :torpedo}, opponent) do
@@ -162,14 +179,6 @@ defmodule Battleship.Participants do
   def is_hit?({x, y}, %Participant{} = opponent) do
     opponent.ships
     |> Enum.map(&Ships.is_hit?(&1, {x, y}))
-    |> Enum.any?()
-  end
-
-  def is_hit?({x, y, :airstrike}, %Participant{} = opponent) do
-    strikes = for i <- -1..1, j <- -1..1, into: [], do: {x + i, y + j}
-
-    strikes
-    |> Enum.map(&is_hit?(&1, opponent))
     |> Enum.any?()
   end
 

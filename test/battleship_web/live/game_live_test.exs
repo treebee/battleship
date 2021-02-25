@@ -79,13 +79,7 @@ defmodule BattleshipWeb.GameLiveTest do
     view |> element("button", "Ready") |> render_click()
     game = Games.get_game!(game.id)
 
-    [player1, player2] = game.participants
-
-    player =
-      cond do
-        Participants.their_turn?(player1) -> player1
-        Participants.their_turn?(player2) -> player2
-      end
+    player = Games.get_start_player(game)
 
     make_turn(conn, player, game, {0, 1})
 
@@ -183,6 +177,36 @@ defmodule BattleshipWeb.GameLiveTest do
       |> live("/games/#{game.id}")
 
     assert html =~ "#{player.username} won the game!"
+  end
+
+  test "user can use airstrikes", %{conn: conn} do
+    game = game_fixture(%{setup_players: 1})
+    [opponent, player] = game.participants
+    conn = login(conn, %{username: player.username, return_to: "/"})
+
+    {:ok, view, _html} = live(conn, "/games/#{game.id}")
+
+    set_ships(view)
+    view |> element("button", "Ready") |> render_click()
+    Participants.update_participant(player, %{is_start_player: true})
+    Participants.update_participant(opponent, %{is_start_player: false})
+    game = Games.get_game!(game.id)
+
+    {:ok, view, _html} =
+      conn
+      |> live("/games/#{game.id}")
+
+    assert Participants.count_hits(player) == 0
+
+    view
+    |> render_keyup("switch_weapon", %{"key" => " "})
+
+    view
+    |> element("#cell-3-0")
+    |> render_click()
+
+    player = Participants.get_participant!(player.id)
+    assert Participants.count_hits(player) == 5
   end
 
   defp make_turn(conn, player, game, {x, y}) do

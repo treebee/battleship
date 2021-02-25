@@ -23,7 +23,7 @@ defmodule BattleshipWeb.GameLive do
       Presence.track(self(), "users", current_user, %{})
     end
 
-    {:ok, assign(socket, current_user: current_user)}
+    {:ok, assign(socket, current_user: current_user) |> assign(:weapon, :torpedo)}
   end
 
   @impl true
@@ -53,7 +53,7 @@ defmodule BattleshipWeb.GameLive do
     <div class="container mt-12">
       <%= if @current_user do %>
         <%= if @game.state in [:started, :finished] do %>
-          <%= live_component @socket, BattleshipWeb.Components.Game, game: @game, player: @player, opponent: @opponent, next_player: @next_player %>
+          <%= live_component @socket, BattleshipWeb.Components.Game, game: @game, player: @player, opponent: @opponent, next_player: @next_player, weapon: @weapon %>
         <% else %>
           <%= live_component @socket, BattleshipWeb.Components.GameLobby, ships_on_grid: @ships_on_grid, ships: @ships, ready: length(@player.ships) == 5 %>
         <% end %>
@@ -167,6 +167,26 @@ defmodule BattleshipWeb.GameLive do
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "switch_weapon",
+        %{"key" => " "},
+        %{assigns: %{weapon: :torpedo, player: %{num_airstrikes: num_airstrikes}}} = socket
+      )
+      when num_airstrikes in [nil, 0] do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("switch_weapon", %{"key" => " "}, %{assigns: %{weapon: :torpedo}} = socket) do
+    {:noreply, assign(socket, :weapon, :airstrike)}
+  end
+
+  @impl true
+  def handle_event("switch_weapon", %{"key" => " "}, %{assigns: %{weapon: :airstrike}} = socket) do
+    {:noreply, assign(socket, :weapon, :torpedo)}
   end
 
   defp update_ship(ships, id, params) do

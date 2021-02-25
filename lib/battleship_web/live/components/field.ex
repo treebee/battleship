@@ -7,7 +7,9 @@ defmodule BattleshipWeb.Components.Field do
      assign(socket, :ships, [])
      |> assign(:is_opponent, false)
      |> assign(:shots, %{})
-     |> assign(:clickable, false)}
+     |> assign(:clickable, false)
+     |> assign(:weapon, :torpedo)
+     |> assign(:game_started, false)}
   end
 
   @impl true
@@ -28,7 +30,15 @@ defmodule BattleshipWeb.Components.Field do
       <div class="grid grid-cols-10 gap-1">
         <%= for y <- 0..9 do %>
           <%= for x <- 0..9 do %>
-            <%= live_component @socket, BattleshipWeb.Components.Cell, id: {@id, x, y}, x: x, y: y, ship: Map.get(@ships, {x, y}), shot: Map.get(@shots, {x, y}), clickable: @clickable do %>
+            <%= live_component @socket, BattleshipWeb.Components.Cell,
+              id: {@id, x, y},
+              x: x,
+              y: y,
+              ship: Map.get(@ships, {x, y}),
+              shot: Map.get(@shots, {x, y}),
+              clickable: @clickable,
+              weapon: @weapon,
+              game_started: @game_started do %>
             <%= if not @is_opponent do %>
               <%= live_component @socket, BattleshipWeb.Components.Ship,
                   id: @ship.name,

@@ -10,6 +10,7 @@ defmodule Battleship.Participant do
     embeds_many :shots, Shot
     field :username, :string
     field :is_start_player, :boolean, default: false
+    field :num_airstrikes, :integer, default: 1
     belongs_to :game, Battleship.Game, type: :binary_id
 
     timestamps()
@@ -18,7 +19,7 @@ defmodule Battleship.Participant do
   @doc false
   def changeset(participant, attrs) do
     participant
-    |> cast(attrs, [:game_id, :username, :is_start_player])
+    |> cast(attrs, [:game_id, :username, :is_start_player, :num_airstrikes])
     |> cast_embed(:ships, with: &Battleship.Ship.changeset/2)
     |> cast_embed(:shots, with: &Battleship.Shot.changeset/2)
     |> validate_required([:username, :game_id])

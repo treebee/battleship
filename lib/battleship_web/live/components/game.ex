@@ -11,15 +11,31 @@ defmodule BattleshipWeb.Components.Game do
   @impl true
   def update(assigns, socket) do
     player_shots =
-      assigns.player.shots |> Enum.map(fn shot -> {{shot.x, shot.y}, shot} end) |> Map.new()
+      assigns.player.shots |> Enum.map(&convert_shot/1) |> List.flatten() |> Map.new()
 
     opponent_shots =
-      assigns.opponent.shots |> Enum.map(fn shot -> {{shot.x, shot.y}, shot} end) |> Map.new()
+      assigns.opponent.shots |> Enum.map(&convert_shot/1) |> List.flatten() |> Map.new()
+
+    num_airstrikes =
+      if assigns.player.num_airstrikes == nil do
+        0
+      else
+        assigns.player.num_airstrikes
+      end
+
+    opponent_airstrikes =
+      if assigns.opponent.num_airstrikes == nil do
+        0
+      else
+        assigns.opponent.num_airstrikes
+      end
 
     {:ok,
      assign(socket, assigns)
      |> assign(:player_shots, player_shots)
-     |> assign(:opponent_shots, opponent_shots)}
+     |> assign(:opponent_shots, opponent_shots)
+     |> assign(:num_airstrikes, num_airstrikes)
+     |> assign(:opponent_airstrikes, opponent_airstrikes)}
   end
 
   @impl true
@@ -35,8 +51,23 @@ defmodule BattleshipWeb.Components.Game do
         <div class="inline-block md:flex md:justify-between">
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player, active: @player.username == @next_player %>
-            <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false %>
-            <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @player.shots %>
+            <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false, game_started: @game.state in [:started, :finished] %>
+            <div class="p-4">
+              <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @player.shots %>
+              <div class="text-2xl font-semibold text-yellow-400">Airstrikes: <%= @num_airstrikes %></div>
+              <div
+                id="airstrike"
+                class="text-white"
+                phx-window-keyup="switch_weapon">
+                <div>
+                  Currently selected weapon:
+                  <span class="text-yellow-100 text-xl"><%= @weapon %></span>
+                </div>
+                <div>
+                  Hit "space" to toggle weapons.
+                </div>
+              </div>
+            </div>
           </div>
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @opponent, active: @opponent.username == @next_player %>
@@ -46,8 +77,13 @@ defmodule BattleshipWeb.Components.Game do
               ready: true,
               is_opponent: true,
               shots: @player_shots,
-              clickable: @game.state != :finished %>
-            <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @opponent.shots %>
+              clickable: @game.state != :finished, weapon: @weapon,
+              game_started: @game.state in [:started, :finished]
+            %>
+            <div class="p-4">
+              <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @opponent.shots %>
+              <div class="text-2xl font-semibold text-yellow-400">Airstrikes: <%= @opponent_airstrikes %></div>
+            </div>
           </div>
         </div>
       </div>
@@ -57,4 +93,10 @@ defmodule BattleshipWeb.Components.Game do
   defp convert_ships(ships) do
     ships |> Enum.map(fn ship -> {{ship.x, ship.y}, ship} end) |> Map.new()
   end
+
+  defp convert_shot(%{type: :airstrike, strikes: strikes}) do
+    strikes |> Enum.map(fn strike -> {{strike.x, strike.y}, strike} end)
+  end
+
+  defp convert_shot(shot), do: {{shot.x, shot.y}, shot}
 end

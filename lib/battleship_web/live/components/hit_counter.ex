@@ -10,7 +10,7 @@ defmodule BattleshipWeb.Components.HitCounter do
   @impl true
   def render(assigns) do
     ~L"""
-      <div class="text-center text-2xl font-semibold text-yellow-300">
+      <div class="text-2xl font-semibold text-yellow-300">
           Hits: <%= @num_hits %>
       </div>
     """

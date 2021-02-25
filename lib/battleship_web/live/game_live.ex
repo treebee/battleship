@@ -22,7 +22,7 @@ defmodule BattleshipWeb.GameLive do
       Presence.track(self(), "users", current_user, %{})
     end
 
-    {:ok, assign(socket, current_user: current_user, players: [])}
+    {:ok, assign(socket, current_user: current_user)}
   end
 
   @impl true
@@ -37,6 +37,7 @@ defmodule BattleshipWeb.GameLive do
       |> assign_user_to_game(current_user, socket)
       |> prepare_player_info()
 
+    Games.subscribe(id)
     {:noreply, assign(socket, :game, Games.get_game!(id))}
   end
 
@@ -165,13 +166,6 @@ defmodule BattleshipWeb.GameLive do
   end
 
   @impl true
-  def handle_info(%{event: "presence_diff"}, socket) do
-    id = socket.assigns.game.id
-    players = Presence.list("game:#{id}") |> Enum.map(fn {name, _} -> name end)
-    {:noreply, assign(socket, players: players)}
-  end
-
-  @impl true
   def handle_info(%{event: "start_game"}, socket) do
     game = Games.get_game!(socket.assigns.game.id)
     {:noreply, assign(socket, :game, game)}
@@ -202,12 +196,10 @@ defmodule BattleshipWeb.GameLive do
             |> push_redirect(to: Routes.page_path(socket, :index))
 
           {:ok, player} ->
-            track_user(game.id, player.username)
             socket |> assign(:player, player)
         end
 
       player ->
-        track_user(game.id, current_user)
         socket |> assign(:player, player)
     end
   end
@@ -232,10 +224,5 @@ defmodule BattleshipWeb.GameLive do
             |> assign(:ships, Enum.map(@ships, fn ship -> %{ship | draggable: false} end))
         end
     end
-  end
-
-  def track_user(game_id, username) do
-    Games.subscribe(game_id)
-    Presence.track(self(), "game:#{game_id}", username, %{})
   end
 end

@@ -49,8 +49,8 @@ defmodule BattleshipWeb.Components.Game do
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player, active: @player.username == @next_player %>
             <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false, game_started: @game.state in [:started, :finished] %>
             <div class="p-4">
-              <%= live_component @socket, BattleshipWeb.Components.HitCounter, num_hits: Participants.count_hits(@player) %>
-              <div class="text-2xl font-semibold text-yellow-400">Airstrikes: <%= @num_airstrikes %></div>
+              <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Hits", value: Participants.count_hits(@player) %>
+              <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Airstrikes", value: @num_airstrikes %>
               <div
                 id="airstrike"
                 class="text-white"
@@ -77,8 +77,8 @@ defmodule BattleshipWeb.Components.Game do
               game_started: @game.state in [:started, :finished]
             %>
             <div class="p-4">
-              <%= live_component @socket, BattleshipWeb.Components.HitCounter, num_hits: Participants.count_hits(@opponent) %>
-              <div class="text-2xl font-semibold text-yellow-400">Airstrikes: <%= @opponent_airstrikes %></div>
+              <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Hits", value: Participants.count_hits(@opponent) %>
+              <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Airstrikes", value: @opponent_airstrikes %>
             </div>
           </div>
         </div>

@@ -189,15 +189,6 @@ defmodule BattleshipWeb.GameLive do
     {:noreply, assign(socket, :weapon, :torpedo)}
   end
 
-  defp update_ship(ships, id, params) do
-    Enum.map(ships, fn ship ->
-      case ship.name == id do
-        true -> Map.merge(ship, params)
-        false -> ship
-      end
-    end)
-  end
-
   @impl true
   def handle_info(%{event: "start_game"}, socket) do
     game = Games.get_game!(socket.assigns.game.id)
@@ -305,5 +296,14 @@ defmodule BattleshipWeb.GameLive do
          } = socket
        ) do
     assign(socket, :next_player, player.username)
+  end
+
+  defp update_ship(ships, id, params) do
+    Enum.map(ships, fn ship ->
+      case ship.name == id do
+        true -> Map.merge(ship, params)
+        false -> ship
+      end
+    end)
   end
 end

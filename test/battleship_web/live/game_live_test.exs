@@ -7,6 +7,7 @@ defmodule BattleshipWeb.GameLiveTest do
 
   alias Battleship.Games
   alias Battleship.Participants
+  alias Battleship.Ships
 
   test "user can set ships", %{conn: conn} do
     game = game_fixture()
@@ -21,9 +22,20 @@ defmodule BattleshipWeb.GameLiveTest do
 
     view |> element("button", "Ready") |> render_click()
 
-    game = Games.get_game!(game.id)
-    player = Games.get_player(game, player1.username)
+    player =
+      Games.get_game!(game.id)
+      |> Games.get_player(player1.username)
+
     assert length(player.ships) == 5
+
+    ship_coords =
+      player.ships |> Enum.map(fn ship -> {ship.name, Ships.cells(ship)} end) |> Map.new()
+
+    assert Map.get(ship_coords, "carrier") == [{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}]
+    assert Map.get(ship_coords, "battleship") == [{1, 0}, {1, 1}, {1, 2}, {1, 3}]
+    assert Map.get(ship_coords, "destroyer") == [{2, 0}, {2, 1}]
+    assert Map.get(ship_coords, "cruiser") == [{6, 0}, {7, 0}, {8, 0}]
+    assert Map.get(ship_coords, "submarine") == [{4, 0}, {4, 1}, {4, 2}]
   end
 
   test "user can toggle ships", %{conn: conn} do
@@ -45,7 +57,7 @@ defmodule BattleshipWeb.GameLiveTest do
     game = Games.get_game!(game.id)
     player = Games.get_player(game, player1.username)
     cruiser = Enum.find(player.ships, fn ship -> ship.name == "cruiser" end)
-    assert cruiser.direction == "x"
+    assert cruiser.direction == "y"
     battleship = Enum.find(player.ships, fn ship -> ship.name == "battleship" end)
     assert battleship.direction == "y"
   end
@@ -224,6 +236,8 @@ defmodule BattleshipWeb.GameLiveTest do
   end
 
   defp set_ships(view) do
+    # expected coordinates:
+    # {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}
     view
     |> render_hook("add_ship", %{
       "x" => 0,
@@ -233,6 +247,8 @@ defmodule BattleshipWeb.GameLiveTest do
       "direction" => "y"
     })
 
+    # expected coordinates:
+    # {1, 0}, {1, 1}, {1, 2}, {1, 3}
     view
     |> render_hook("add_ship", %{
       "x" => 1,
@@ -242,6 +258,8 @@ defmodule BattleshipWeb.GameLiveTest do
       "direction" => "y"
     })
 
+    # expected coordinates:
+    # {2, 0}, {2, 1}
     view
     |> render_hook("add_ship", %{
       "x" => 2,
@@ -251,6 +269,8 @@ defmodule BattleshipWeb.GameLiveTest do
       "direction" => "y"
     })
 
+    # expected coordinates:
+    # {6, 0}, {7, 0}, {8, 0}
     view
     |> render_hook("add_ship", %{
       "x" => 6,
@@ -260,6 +280,10 @@ defmodule BattleshipWeb.GameLiveTest do
       "direction" => "y"
     })
 
+    view |> element("#cruiser") |> render_click()
+
+    # expected coordinates:
+    # {4, 0}, {4, 1}, {4, 2}
     view
     |> render_hook("add_ship", %{
       "x" => 4,

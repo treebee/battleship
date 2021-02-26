@@ -196,6 +196,11 @@ defmodule Battleship.Participants do
     |> Enum.count(fn {_, hit} -> hit end)
   end
 
+  def set_start_player(%Participant{} = participant) do
+    {:ok, _} = update_participant(get_opponent(participant), %{is_start_player: false})
+    update_participant(participant, %{is_start_player: true})
+  end
+
   defp to_simple_shot(%{type: :airstrike, strikes: strikes}) do
     strikes |> Enum.map(&to_simple_shot/1)
   end

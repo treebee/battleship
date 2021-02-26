@@ -139,8 +139,7 @@ defmodule BattleshipWeb.GameLiveTest do
     set_ships(view)
     view |> element("button", "Ready") |> render_click()
     game = Games.get_game!(game.id)
-
-    player = Games.get_start_player(game)
+    {:ok, player} = Participants.set_start_player(player)
 
     make_turn(conn, player, game, {0, 1})
     opponent = Participants.get_opponent(player)

@@ -13,6 +13,7 @@ defmodule BattleshipWeb.Components.Cell do
       phx-value-y="<%= @y %>"
       phx-value-type="<%= @weapon %>"
       style="cursor: crosshair"
+      onmouseover="highlightCells(event, { weapon: '<%= @weapon %>'})"
       <% else %>
       <%= if not @game_started do %>
       phx-hook="Drag"

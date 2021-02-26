@@ -50,3 +50,43 @@ liveSocket.connect();
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket;
+
+const findNeighbors = (x, y) => {
+  const coords = [];
+  for (let i = -1; i < 2; ++i) {
+    for (let j = -1; j < 2; ++j) {
+      if (
+        x + i < 0 ||
+        y + j < 0 ||
+        x + i > 9 ||
+        y + j > 9 ||
+        (i === 0 && j === 0)
+      )
+        continue;
+      coords.push({ x: x + i, y: y + j });
+    }
+  }
+  return coords.map(({ x, y }) => {
+    return `#cell-${x}-${y}`;
+  });
+};
+window.highlightCells = (event, { weapon }) => {
+  const x = +event.target.getAttribute("phx-value-x");
+  const y = +event.target.getAttribute("phx-value-y");
+  const ids = [event.target.id]; //.classList.add("bg-blue-900");
+  if (weapon == "airstrike") {
+    findNeighbors(x, y).forEach((id) => {
+      ids.push(id);
+    });
+  }
+  ids.forEach((id) => {
+    document.getElementById(id.replace("#", "")).classList.add("bg-blue-900");
+  });
+  event.target.onmouseleave = () => {
+    ids.forEach((id) => {
+      document
+        .getElementById(id.replace("#", ""))
+        .classList.remove("bg-blue-900");
+    });
+  };
+};

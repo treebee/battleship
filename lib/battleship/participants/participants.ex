@@ -140,7 +140,13 @@ defmodule Battleship.Participants do
           type: :airstrike
         }
 
-        add_shot(participant, shot)
+        case add_shot(participant, shot) do
+          {:ok, participant} ->
+            update_participant(participant, %{num_airstrikes: participant.num_airstrikes - 1})
+
+          error ->
+            error
+        end
 
       true ->
         {:error, "No airstrikes left!"}

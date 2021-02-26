@@ -217,7 +217,7 @@ defmodule BattleshipWeb.GameLiveTest do
            |> render_click() =~ "Hits: 5"
 
     player = Participants.get_participant!(player.id)
-    assert Participants.count_hits(player) == 5
+    assert player.num_airstrikes == 0
   end
 
   defp make_turn(conn, player, game, {x, y}) do

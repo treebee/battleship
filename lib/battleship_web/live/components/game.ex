@@ -2,11 +2,7 @@ defmodule BattleshipWeb.Components.Game do
   use BattleshipWeb, :live_component
 
   alias Battleship.Games
-
-  @impl true
-  def mount(socket) do
-    {:ok, socket}
-  end
+  alias Battleship.Participants
 
   @impl true
   def update(assigns, socket) do
@@ -53,7 +49,7 @@ defmodule BattleshipWeb.Components.Game do
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player, active: @player.username == @next_player %>
             <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false, game_started: @game.state in [:started, :finished] %>
             <div class="p-4">
-              <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @player.shots %>
+              <%= live_component @socket, BattleshipWeb.Components.HitCounter, num_hits: Participants.count_hits(@player) %>
               <div class="text-2xl font-semibold text-yellow-400">Airstrikes: <%= @num_airstrikes %></div>
               <div
                 id="airstrike"
@@ -81,7 +77,7 @@ defmodule BattleshipWeb.Components.Game do
               game_started: @game.state in [:started, :finished]
             %>
             <div class="p-4">
-              <%= live_component @socket, BattleshipWeb.Components.HitCounter, shots: @opponent.shots %>
+              <%= live_component @socket, BattleshipWeb.Components.HitCounter, num_hits: Participants.count_hits(@opponent) %>
               <div class="text-2xl font-semibold text-yellow-400">Airstrikes: <%= @opponent_airstrikes %></div>
             </div>
           </div>

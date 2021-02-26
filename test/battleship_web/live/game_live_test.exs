@@ -212,9 +212,9 @@ defmodule BattleshipWeb.GameLiveTest do
     view
     |> render_keyup("switch_weapon", %{"key" => " "})
 
-    view
-    |> element("#cell-3-0")
-    |> render_click()
+    assert view
+           |> element("#cell-3-0")
+           |> render_click() =~ "Hits: 5"
 
     player = Participants.get_participant!(player.id)
     assert Participants.count_hits(player) == 5

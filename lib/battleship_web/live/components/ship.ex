@@ -30,8 +30,6 @@ defmodule BattleshipWeb.Components.Ship do
         draggable="<%= @draggable %>"
         class='bg-green-400 cursor-move grid <%= if @direction == "y" do %>grid-flow-row<% else %>grid-flow-col<% end %> gap-1 <%= if !@draggable do %>opacity-50<% end %> <%= if @in_grid do %>absolute z-10<% else %>mx-1<% end %>'
         id="<%= @id %>"
-        data-size="<%= @size %>"
-        data-direction="<%= @direction %>"
         phx-value-x="<%= @x %>"
         phx-value-y="<%= @y %>"
         phx-value-size="<%= @size %>"

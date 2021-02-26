@@ -8,8 +8,8 @@ export default {
   dragStart(event) {
     this.ship = {
       id: event.target.id,
-      size: +event.target.dataset.size,
-      direction: event.target.dataset.direction,
+      size: +event.target.getAttribute("phx-value-size"),
+      direction: event.target.getAttribute("phx-value-direction"),
     };
   },
   dropShip(event, x, y) {

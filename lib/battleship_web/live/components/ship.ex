@@ -23,8 +23,7 @@ defmodule BattleshipWeb.Components.Ship do
   def render(assigns) do
     ~L"""
     <div
-        phx-hook="Drag"
-        ondragstart="dragHook.dragStart(event)"
+        ondragstart="dragStart(event)"
     >
       <div
         draggable="<%= @draggable %>"

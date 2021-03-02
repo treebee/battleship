@@ -20,9 +20,6 @@ export default {
       event.currentTarget.classList.remove("bg-blue-900");
     };
   },
-  destroyed() {
-    window.dragHook = null;
-  },
 };
 
 export const dragStart = (event) => {

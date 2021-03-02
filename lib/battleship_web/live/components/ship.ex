@@ -15,7 +15,7 @@ defmodule BattleshipWeb.Components.Ship do
 
   @impl true
   def update(assigns, socket) do
-    in_grid = not String.starts_with?(assigns.id, "lobby")
+    in_grid = not String.starts_with?(assigns.name, "lobby")
     {:ok, socket |> assign(assigns) |> assign(:in_grid, in_grid)}
   end
 
@@ -23,12 +23,12 @@ defmodule BattleshipWeb.Components.Ship do
   def render(assigns) do
     ~L"""
     <div
-        ondragstart="dragStart(event)"
     >
       <div
         draggable="<%= @draggable %>"
-        class='bg-green-400 cursor-move grid <%= if @direction == "y" do %>grid-flow-row<% else %>grid-flow-col<% end %> gap-1 <%= if !@draggable do %>opacity-50<% end %> <%= if @in_grid do %>absolute z-10<% else %>mx-1<% end %>'
-        id="<%= @id %>"
+        ondragstart="dragStart(event)"
+        class='bg-green-400 cursor-move grid <%= if @direction == "y" do %>grid-flow-row<% else %>grid-flow-col<% end %> gap-1 <%= if !@draggable and !@in_grid do %>opacity-50<% end %> <%= if @in_grid do %>absolute z-10<% else %>mx-1<% end %>'
+        id="<%= @name %>"
         phx-value-x="<%= @x %>"
         phx-value-y="<%= @y %>"
         phx-value-size="<%= @size %>"

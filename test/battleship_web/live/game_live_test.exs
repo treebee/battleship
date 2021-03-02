@@ -9,7 +9,21 @@ defmodule BattleshipWeb.GameLiveTest do
   alias Battleship.Participants
   alias Battleship.Ships
 
-  test "user can set ships", %{conn: conn} do
+  test "user can place ship on grid", %{conn: conn} do
+    game = game_fixture()
+    [player1, _] = game.participants
+
+    {:ok, view, _html} =
+      conn
+      |> login(%{username: player1.username, return_to: "/"})
+      |> live("/games/#{game.id}")
+
+    set_ships(view)
+
+    view |> element("#cell-4-0 > div > #submarine") |> has_element?()
+  end
+
+  test "user can set and submit ships", %{conn: conn} do
     game = game_fixture()
     [player1, _] = game.participants
 

@@ -31,7 +31,6 @@ defmodule BattleshipWeb.Components.Field do
         <%= for y <- 0..9 do %>
           <%= for x <- 0..9 do %>
             <%= live_component @socket, BattleshipWeb.Components.Cell,
-              id: {@id, x, y},
               x: x,
               y: y,
               ship: Map.get(@ships, {x, y}),
@@ -41,7 +40,7 @@ defmodule BattleshipWeb.Components.Field do
               game_started: @game_started do %>
             <%= if not @is_opponent do %>
               <%= live_component @socket, BattleshipWeb.Components.Ship,
-                  id: @ship.name,
+                  name: @ship.name,
                   draggable: not @ready,
                   x: x,
                   y: y,

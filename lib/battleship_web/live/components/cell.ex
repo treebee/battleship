@@ -5,10 +5,10 @@ defmodule BattleshipWeb.Components.Cell do
   def render(assigns) do
     ~L"""
     <div
-      class="bg-blue-800 border-blue-900 text-white text-center text-xs w-8 h-8 relative"
+      class="bg-blue-800 w-8 h-8 relative"
       phx-value-x="<%= @x %>"
       phx-value-y="<%= @y %>"
-     <%= if @clickable do %>
+      <%= if @clickable do %>
       id="cell-<%= @x %>-<%= @y %>"
       phx-click="shoot"
       phx-value-type="<%= @weapon %>"
@@ -16,6 +16,7 @@ defmodule BattleshipWeb.Components.Cell do
       onmouseover="highlightCells(event, { weapon: '<%= @weapon %>'})"
       <% else %>
       <%= if not @game_started do %>
+      id="cell-<%= @x %>-<%= @y %>"
       phx-hook="Drag"
       <% end %>
       <% end %>

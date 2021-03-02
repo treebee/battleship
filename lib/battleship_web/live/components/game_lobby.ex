@@ -14,7 +14,7 @@ defmodule BattleshipWeb.Components.GameLobby do
           >Ready</button>
           <div class="w-64 h-64 flex">
             <%= for %{name: name, size: size, draggable: draggable} <- Enum.sort_by(@ships, &(&1.size), :desc) do %>
-              <%= live_component @socket, BattleshipWeb.Components.Ship, id: "lobby" <> name, size: size, draggable: draggable, direction: "y" %>
+              <%= live_component @socket, BattleshipWeb.Components.Ship, name: "lobby" <> name, size: size, draggable: draggable, direction: "y" %>
             <% end %>
           </div>
         </div>

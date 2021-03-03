@@ -3,9 +3,9 @@ use Mix.Config
 # Configure your database
 config :battleship, Battleship.Repo,
   username: "postgres",
-  password: "pg-secret",
+  password: "postgres",
   database: "battleship_dev",
-  hostname: "localhost",
+  hostname: "db",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 

@@ -1,0 +1,17 @@
+{
+  "name": "manageme - docker-compose",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "docker-compose.yml",
+  ],
+  "service": "vscode",
+  "workspaceFolder": "/app",
+  "settings": {
+    "terminal.integrated.shell.linux": null
+  },
+  "extensions": [
+    "jakebecker.elixir-ls",
+    "bradlc.vscode-tailwindcss"
+  ],
+  "remoteUser": "user"
+}

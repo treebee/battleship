@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  battleship:
+    image: battleship:latest
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_HOST: "db"
+    command: mix phx.server
+    volumes:
+      - ./assets/vendor:/app/assets/vendor:z
+      - ./assets/static:/app/assets/static:z
+      - ./assets/js:/app/assets/js:z
+      - ./assets/css:/app/assets/css:z
+      - ./assets/postcss.config.js:/app/assets/postcss.config.js:z
+      - ./assets/webpack.config.js:/app/assets/webpack.config.js:z
+      - ./assets/tailwind.config.js:/app/assets/tailwind.config.js:z
+      - ./assets/package.json:/app/assets/package.json:z
+      - ./config:/app/config:z
+      - ./lib:/app/lib:z
+      - ./priv:/app/priv:z
+
+  db:
+    image: postgres:13
+    ports:
+        - "2345:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"

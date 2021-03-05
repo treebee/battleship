@@ -21,4 +21,4 @@ test:
 coveralls.html:
 	$(dc) run --rm battleship mix coveralls.html
 
-
+.PHONY: test coveralls.html logs run setup-db build

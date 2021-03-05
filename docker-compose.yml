@@ -23,8 +23,8 @@ services:
       - ./assets/package.json:/app/assets/package.json:z
       - ./config:/app/config:z
       - ./lib:/app/lib:z
+      - ./test:/app/test:z
       - ./priv:/app/priv:z
-
   db:
     image: postgres:13
     ports:

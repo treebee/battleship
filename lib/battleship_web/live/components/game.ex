@@ -47,7 +47,16 @@ defmodule BattleshipWeb.Components.Game do
         <div class="inline-block md:flex md:justify-between">
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @player, active: @player.username == @next_player %>
-            <%= live_component @socket, BattleshipWeb.Components.Field, id: "player", ships: convert_ships(@player.ships), ready: true, shots: @opponent_shots, clickable: false, game_started: @game.state in [:started, :finished] %>
+            <div class="<%= if @player.username == @next_player do %>border-2 border-yellow-300 rounded-md shadow-lg<% end %>">
+              <%= live_component @socket, BattleshipWeb.Components.Field,
+                id: "player",
+                ships: convert_ships(@player.ships),
+                ready: true,
+                shots: @opponent_shots,
+                clickable: false,
+                game_started: @game.state in [:started, :finished]
+              %>
+            </div>
             <div class="p-4">
               <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Hits", value: Participants.count_hits(@player) %>
               <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Airstrikes", value: @num_airstrikes %>
@@ -67,15 +76,17 @@ defmodule BattleshipWeb.Components.Game do
           </div>
           <div>
             <%= live_component @socket, BattleshipWeb.Components.PlayerLabel, player: @opponent, active: @opponent.username == @next_player %>
-            <%= live_component @socket, BattleshipWeb.Components.Field,
-              id: "opponent",
-              ships: convert_ships(@opponent.ships),
-              ready: true,
-              is_opponent: true,
-              shots: @player_shots,
-              clickable: @game.state != :finished, weapon: @weapon,
-              game_started: @game.state in [:started, :finished]
-            %>
+            <div class="<%= if @opponent.username == @next_player do %>border-2 border-yellow-300 rounded-md shadow-lg<% end %>">
+              <%= live_component @socket, BattleshipWeb.Components.Field,
+                id: "opponent",
+                ships: convert_ships(@opponent.ships),
+                ready: true,
+                is_opponent: true,
+                shots: @player_shots,
+                clickable: @game.state != :finished, weapon: @weapon,
+                game_started: @game.state in [:started, :finished]
+              %>
+            </div>
             <div class="p-4">
               <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Hits", value: Participants.count_hits(@opponent) %>
               <%= live_component @socket, BattleshipWeb.Components.StatsLabel, text: "Airstrikes", value: @opponent_airstrikes %>

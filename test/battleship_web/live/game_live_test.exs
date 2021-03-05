@@ -226,9 +226,13 @@ defmodule BattleshipWeb.GameLiveTest do
     view
     |> render_keyup("switch_weapon", %{"key" => " "})
 
+    assert view |> has_element?("span[data-testid='selected-weapon']", "airstrike")
+
     assert view
            |> element("#cell-3-0")
            |> render_click() =~ "Hits: 5"
+
+    assert view |> has_element?("span[data-testid='selected-weapon']", "torpedo")
 
     player = Participants.get_participant!(player.id)
     assert player.num_airstrikes == 0

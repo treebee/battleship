@@ -57,7 +57,7 @@ defmodule BattleshipWeb.Components.Game do
                 phx-window-keyup="switch_weapon">
                 <div>
                   Currently selected weapon:
-                  <span class="text-yellow-100 text-xl"><%= @weapon %></span>
+                  <span class="text-yellow-100 text-xl" data-testid="selected-weapon"><%= @weapon %></span>
                 </div>
                 <div>
                   Hit "space" to toggle weapons.

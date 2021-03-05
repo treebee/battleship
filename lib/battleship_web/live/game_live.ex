@@ -156,7 +156,7 @@ defmodule BattleshipWeb.GameLive do
               Games.broadcast(game.id, "game_finished")
             end
 
-            socket |> assign(:player, player)
+            socket |> assign(:player, player) |> assign(:weapon, :torpedo)
 
           {:error, error} ->
             IO.puts(:stderr, error)
